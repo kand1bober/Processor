@@ -23,11 +23,12 @@ void Run()
 
     while(1)
     {
-        char command_line[10] = "Hello";
+        int command = 0;
 
-        scanf("%s", command_line);
 
-        if ( strcmp(command_line, "push") == 0 )
+        scanf("%d", &command);
+
+        if ( command == push )
         {
             ProcElem arg = 0;
             scanf("%d", &arg);
@@ -36,7 +37,7 @@ void Run()
             continue;
         }
 
-        if ( strcmp(command_line, "out") == 0 )
+        if ( command == out )
         {
             ProcElem arg = 0;
             arg = STACK_POP_CALL(&flow);
@@ -45,13 +46,13 @@ void Run()
             continue;
         }
 
-        // if ( strcmp(command_line, "in") == 0)
+        // if ( strcmp(command, "in") == 0)
         // {
             
             
         // }
 
-        if ( strcmp(command_line, "add") == 0 )
+        if ( command == add)
         {
             ProcElem a = STACK_POP_CALL(&flow);
             ProcElem b = STACK_POP_CALL(&flow);
@@ -60,7 +61,7 @@ void Run()
             continue;
         }
 
-        if ( strcmp(command_line, "sub") == 0 )
+        if ( command == sub)
         {
             ProcElem a = STACK_POP_CALL(&flow);
             ProcElem b = STACK_POP_CALL(&flow);
@@ -69,7 +70,7 @@ void Run()
             continue;
         }
 
-        if ( strcmp(command_line, "mul") == 0)
+        if ( command == mul )
         {
             ProcElem a = STACK_POP_CALL(&flow);
             ProcElem b = STACK_POP_CALL(&flow);
@@ -79,7 +80,7 @@ void Run()
             continue;
         }
 
-        if ( strcmp(command_line, "div") == 0)
+        if ( command == divide )
         {
             ProcElem a = STACK_POP_CALL(&flow);
             ProcElem b = STACK_POP_CALL(&flow);
@@ -89,7 +90,7 @@ void Run()
             continue;
         }
         
-        if ( strcmp(command_line, "sin") == 0)
+        if ( command == sinus)
         {
             //delete, when make on double
             ProcElem a = STACK_POP_CALL(&flow);
@@ -99,7 +100,7 @@ void Run()
             continue;
         }
         
-        if ( strcmp(command_line, "cos") == 0)
+        if ( command == cosinus )
         {
             ProcElem a = STACK_POP_CALL(&flow);
 
@@ -108,7 +109,7 @@ void Run()
             continue;
         }
         
-        if ( strcmp(command_line, "sqrt") == 0)
+        if ( command == root )
         {
             ProcElem a = STACK_POP_CALL(&flow);
 
@@ -117,21 +118,27 @@ void Run()
             continue;
         }
 
-        if ( strcmp(command_line, "dump") == 0 )
+        if ( command == dump )
         {
             StackDump(&flow, __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
             continue;
         }
 
-        if ( strcmp(command_line, "hlt") == 0 )
+        if ( command == hlt )
         {
             STACK_DTOR_CALL(&flow);
             break;
         }
 
+        if( command == 0)
+        {
+            printf("huuuuuy\n");
+            continue;
+        }
+
         else
-            printf("SNTXERR: %s\n", command_line);
+            printf("SNTXERR: %d\n", command);
 
     }
 

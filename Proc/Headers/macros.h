@@ -5,8 +5,13 @@
 #define DEBUG
 #ifdef DEBUG
 
-#define ON_DEBUG( expr ) expr
-#define PAUSE ( getchar() )
+    #define ON_DEBUG_PROC( expr ) expr
+    #define PAUSE getchar() 
+
+#else 
+
+    #define ON_DEBUG_PROC( expr ) 
+    #define PAUSE 
 
 #endif
 

@@ -8,19 +8,25 @@ void Run(int* command_line, size_t size)
     
     STACK_CTOR_CALL(&flow.stack, START_CAPACITY);
 
+    flow.IP = 0;
     while(1)
     {
         // int16_t command = 0;
         // scanf("%d", &command);
 
-        int16_t command = *(command_line + flow.IP++);
+        int command = *(command_line + flow.IP);
 
         switch(command)
         {
             case kPush:
             {
+                printf("push\n");
                 ProcElem arg = 0;
-                scanf("%d", &arg);
+                // scanf("%d", &arg);
+                
+                flow.IP += 1;
+                arg = *(command_line + flow.IP);
+                flow.IP += 1;
 
                 STACK_PUSH_CALL(&flow.stack, arg);
                 PAUSE;
@@ -29,9 +35,10 @@ void Run(int* command_line, size_t size)
 
             case kOut:
             {
+                printf("push\n");
                 ProcElem arg = 0;
+                flow.IP += 1;
                 arg = STACK_POP_CALL(&flow.stack);
-
                 printf("%d\n", arg);
                 PAUSE;
                 continue;
@@ -41,6 +48,7 @@ void Run(int* command_line, size_t size)
                 ProcElem a = STACK_POP_CALL(&flow.stack);
                 ProcElem b = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, a + b);
                 PAUSE;
                 continue;
@@ -50,6 +58,7 @@ void Run(int* command_line, size_t size)
                 ProcElem a = STACK_POP_CALL(&flow.stack);
                 ProcElem b = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, (b - a) );
 
                 PAUSE;
@@ -61,6 +70,7 @@ void Run(int* command_line, size_t size)
                 ProcElem a = STACK_POP_CALL(&flow.stack);
                 ProcElem b = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, (a * b) );
 
                 PAUSE;
@@ -72,6 +82,7 @@ void Run(int* command_line, size_t size)
                 ProcElem a = STACK_POP_CALL(&flow.stack);
                 ProcElem b = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, (b / a) );
 
                 PAUSE;
@@ -83,6 +94,7 @@ void Run(int* command_line, size_t size)
                 //delete, when make on double
                 ProcElem a = STACK_POP_CALL(&flow.stack);
             
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, sin( (double)a ) );
 
                 continue;
@@ -92,6 +104,7 @@ void Run(int* command_line, size_t size)
             {
                 ProcElem a = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, cos( (double)a ) );
                 
                 PAUSE;
@@ -102,6 +115,7 @@ void Run(int* command_line, size_t size)
             {
                 ProcElem a = STACK_POP_CALL(&flow.stack);
 
+                flow.IP += 1;
                 STACK_PUSH_CALL(&flow.stack, sqrt( (double)a ) );
 
                 PAUSE;
@@ -110,8 +124,11 @@ void Run(int* command_line, size_t size)
 
             case kDump:
             {
-                StackDump(&flow.stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
+                #ifdef DEBUG_STACK_FUNCS
+                    StackDump(&flow.stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
+                #endif
 
+                flow.IP += 1;
                 PAUSE;
                 continue;
             }
@@ -119,7 +136,7 @@ void Run(int* command_line, size_t size)
             case kHlt:
             {
                 STACK_DTOR_CALL(&flow.stack);
-
+                printf("Processor stopped\n");
                 PAUSE;
                 break;
             }
@@ -128,6 +145,7 @@ void Run(int* command_line, size_t size)
             {
                 printf("huuuuuy\n");
 
+                flow.IP += 1;
                 PAUSE;
                 continue;
             }
@@ -136,6 +154,7 @@ void Run(int* command_line, size_t size)
             {
                 printf("SNTXERR: %d\n", command);
 
+                flow.IP += 1;
                 PAUSE;
                 continue;
             }

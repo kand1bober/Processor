@@ -15,7 +15,7 @@ endif
 
 
 all:
-	$(CC)    ../Stack/Sources/DebugFuncs.cpp  ../Stack/Sources/functions.cpp    Sources/main.cpp $(CFLAGS) -o Processor
+	$(CC)    ../Stack/Sources/DebugFuncs.cpp  ../Stack/Sources/functions.cpp    Sources/main.cpp Sources/brain.cpp Sources/input.cpp $(CFLAGS) -o Processor
 
 clean:
 	rm -rf /*.o Processor

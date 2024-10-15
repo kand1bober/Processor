@@ -1,7 +1,6 @@
-
-
-#include "../Headers/functions.h"
-#include "../Headers/library.h"
+#include "../../Parser/Headers/pars_library.h"
+#include <../Headers/asm_functions.h"
+#include "../Headers/asm_library.h"
 
 int main()
 {
@@ -19,7 +18,7 @@ int main()
         case 1:
         {
             input_file.name = "PROGRAMM_ASM_1.txt";
-            output_file.name = "PROGRAMM_CODE_1.txt"
+            output_file.name = "PROGRAMM_CODE_1.txt";
             break;
         }
 

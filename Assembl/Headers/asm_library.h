@@ -1,27 +1,9 @@
-#include <sys/stat.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+
+#include "../../Parser/Headers/pars_library.h"
 
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER
-
-
-struct File_code
-{
-    const char* name;
-    const char* author;
-    int size_code;
-};
-
-
-struct File_asm
-{
-    const char* name;
-    int size;
-    char* buffer;
-};
-
 
 enum commands
 {
@@ -38,6 +20,17 @@ enum commands
     kCos = 10,
     kDump = 11,
     kHlt = 12,
+
+    kJa = 13,
+    kJae = 14,
+    kJb = 15,
+    kJbe = 16,
+    kJe = 17,
+    kJne = 18,
+    KJmp = 19,
+
+    kPushR = 20,
+    kOutR = 21,
 };
 
 #endif

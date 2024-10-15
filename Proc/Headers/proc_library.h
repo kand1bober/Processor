@@ -31,12 +31,15 @@ enum commands
     kJne = 18,
     KJmp = 19,
 
+    kPushR = 20,
+    kOutR = 21,
 };
 
 struct SPU
 {
     Stack_t stack;
 
+    //registers, maybe, should make separete structure
     int16_t AX;
     int16_t BX;
     int16_t CX;

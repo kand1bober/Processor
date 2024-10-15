@@ -1,6 +1,6 @@
-#include "../Headers/library.h"
-#include "../Headers/functions.h"
-#include "../Headers/macros.h"
+#include "../Headers/proc_library.h"
+#include "../Headers/proc_functions.h"
+#include "../Headers/proc_macros.h"
 
 void Run(int* command_line, size_t size)
 {

@@ -4,6 +4,8 @@
 
 #include "MyStackLib.h"
 
+#include "../../Parser/Headers/pars_library.h"
+
 #ifndef PROC_FUNCTIONS_HEADER
 #define PROC_FUNCTIONS_HEADER
 

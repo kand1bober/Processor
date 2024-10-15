@@ -1,26 +1,27 @@
-# CC = g++
-# CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
+CC = g++
+CFLAGS = #-fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
 
 # BUILD_DIR = build
 
-# SOURCES_DIR_ASSEMBLER=Sources
-# SOURCES_DIR_PARSER=../Parser/Sources
+SOURCES_DIR_ASSEMBLER=Sources
+SOURCES_DIR_PARSER=../Parser/Sources
 
-# SOURCES = $(wildcard $(SOURCES_DIR_ASSEMBLER)/*.cpp) $(wildcard $(SOURCES_DIR_PARSER)/*.cpp)
+SOURCES = $(wildcard $(SOURCES_DIR_ASSEMBLER)/*.cpp) $(wildcard $(SOURCES_DIR_PARSER)/*.cpp)
 
-# OBJECTS = $(SOURCES:.cpp =.o)
+OBJECTS = $(SOURCES:.cpp =.o)
 
-# EXECUTABLE = Assembler
+EXECUTABLE = Assembler
 
-# all: $(EXECUTABLE)
+all: $(EXECUTABLE)
 
-# $(EXECUTABLE): $(OBJECTS)
-# 	$(CC) $(OBJECTS) $(CFLAGS) -o $(EXECUTABLE)
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(OBJECTS) $(CFLAGS) -o $(EXECUTABLE)
 
-# function.o: 
+%.o: %.cpp
+	$(CC) -c $(SOURCES) $(CFLAGS) -I../Parser/Headers -IHeaders $< -o $@
 
-# clean:
-# 	@rm -rf $(BUILD_DIR)
+clean:
+	@rm -rf $(EXECUTABLE)
 
 
 
@@ -95,33 +96,28 @@
 
 
 
+# CC = g++
+# CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
+
+# SOURCES_DIR_ASSEMBLER = Sources
+# SOURCES_DIR_PARSER = ../Parser/Sources
+# SOURCES = $(wildcard $(SOURCES_DIR_ASSEMBLER)/*.cpp ) $(wildcard $(SOURCES_DIR_PARSER)/*.cpp )
+
+# OBJECTS = $(SOURCES:.cpp =.o)
+
+# BUILD_DIR = build
+
+# EXECUTABLE = Assembler
+
+# $(EXECUTABLE): $(OBJECTS)
+# 	$(CC) $(OBJECTS) -o $@
+
+# $(OBJECTS): $(SOURCES)
+# 	@mkdir -p $(BUILD_DIR)
+# 	$(CC) $(CFLAGS) -I../Parser/Headers -IHeaders $^ -o $(BUILD_DIR)/asm_functions.o $(BUILD_DIR)/asm_main.o $(BUILD_DIR)/pars_functions.o
 
 
 
-
-
-
-CC = g++
-CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
-
-SOURCES_DIR_ASSEMBLER = Sources
-SOURCES_DIR_PARSER = ../Parser/Sources
-SOURCES = $(wildcard $(SOURCES_DIR_ASSEMBLER)/*.cpp ) $(wildcard $(SOURCES_DIR_PARSER)/*.cpp )
-
-BUILD_DIR = build
-
-OBJECTS = $(BUILD_DIR)/asm_functions.o $(BUILD_DIR)/asm_main.o $(BUILD_DIR)/pars_functions.o
-
-EXECUTABLE = Assembler
-
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@
-
-$(BUILD_DIR)/%.o: $(SOURCES)
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $< -o $@
-
-
-clean: 
-	rm -rf $(BUILD_DIR) $(EXECUTABLE)
+# clean: 
+# 	rm -rf $(BUILD_DIR) $(EXECUTABLE)
 

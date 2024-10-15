@@ -1,6 +1,7 @@
 #include "../../Parser/Headers/pars_library.h"
-#include <../Headers/asm_functions.h"
+#include "../Headers/asm_functions.h"
 #include "../Headers/asm_library.h"
+#include "../../Parser/Headers/pars_library.h"
 
 int main()
 {
@@ -11,21 +12,23 @@ int main()
     printf("type number of file with programm\n");
     unsigned file_number = 0;
     scanf("%u", &file_number);
-
-
+    
+    printf("You chose:\n");
     switch( file_number )
     {
         case 1:
         {
-            input_file.name = "PROGRAMM_ASM_1.txt";
-            output_file.name = "PROGRAMM_CODE_1.txt";
+            printf("PROGRAMM_ASM_1.txt\n"); 
+            strcpy(input_file.name, "PROGRAMM_ASM_1.txt");
+            strcpy(output_file.name, "HUUUUUUUUY.txt"); //"PROGRAMM_CODE_1.txt";
             break;
         }
 
         case 2:
         {
-            input_file.name = "PROGRAMM_ASM_2.txt";
-            output_file.name = "PROGRAMM_CODE_2.txt";
+            printf("PROGRAMM_ASM_2.txt\n");
+            strcpy(input_file.name, "PROGRAMM_ASM_2.txt");
+            strcpy(output_file.name, "PROGRAMM_CODE_2.txt"); 
             break;  
         }
 
@@ -35,16 +38,20 @@ int main()
         }
     }
 
-    InputFileStruct(input_file.name);
-    char* input_buffer = input_file.buffer;    
+    InputFileStruct(&input_file); 
 
+    OutputFile(&input_file, &output_file);
 
-    CharToIntAndStruct (&input_file );
+    printf("Your code in output from assembler:\n");
+    printf("size_of_code: %d\n", output_file.size_of_code);
+    for(int i = 0; i < output_file.size_of_code; i++)
+    {
+        printf("%d\n", output_file.buffer[i] );
+    }
+    printf("\n\n");
 
-    OutputFile(output_file, );
-
-    
-    free(input_buffer);
+    free(input_file.buffer);
+    free(output_file.buffer);
 
     return 0;
 }

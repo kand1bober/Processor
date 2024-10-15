@@ -1,7 +1,5 @@
 #include <stdlib.h>
 
-#include "../../Parser/Headers/pars_library.h"
-
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER
 

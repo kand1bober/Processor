@@ -1,13 +1,14 @@
-CC = g++
 
+CC = g++
+CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
+
+# BUILD_DIR = build
 SOURCES_DIR_PROC = Proc/Sources
 SOURCES_DIR_STACK = Stack/Sources
 SOURCES_DIR_ASSEMBLER = Assembl/Sources
 
 SOURCES = $(wildcard $(SOURCES_DIR_PROC)/*.cpp ) $(wildcard $(SOURCES_DIR_STACK)/*.cpp )
 OBJECTS = $(SOURCES:.cpp =.o)
-
-CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
 
 EXECUTABLE = Processor 
 
@@ -24,18 +25,19 @@ ifeq ($(DEB), 1)
 endif
 
 
-all: build
-
-build: $(EXECUTABLE)
+all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $^ -IStack/Headers -IProc/Headers $(CFLAGS)  -o $(EXECUTABLE)
+	$(CC) $(OBJECTS) $(CFLAGS) -o $(EXECUTABLE)
 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) $< -o $@     
+	$(CC) -c $(SOURCES) $(CFLAGS) -IStack/Headers -IProc/Headers $< -o $@
 
 clean:
-	rm -rf /*.o Processor
+	@rm -rf $(EXECUTABLE)
+
+
+
 
 
 

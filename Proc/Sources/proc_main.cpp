@@ -3,15 +3,13 @@
 
 int main()
 {
-    struct File_code file = {};
+    struct File_proc file = {};
 
-    int* command_line = InputFileCode(&file);
+    InputFileCode(&file);
 
-    // size_t size = sizeof( command_line ) / sizeof( int );
+    Run(file.buffer, file.size_of_code);
 
-    size_t size = ;
-
-    Run( command_line, size);
+    free(file.buffer);
 
     return 0;   
 }

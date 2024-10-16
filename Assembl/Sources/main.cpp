@@ -20,7 +20,7 @@ int main()
         {
             printf("PROGRAMM_ASM_1.txt\n"); 
             strcpy(input_file.name, "PROGRAMM_ASM_1.txt");
-            strcpy(output_file.name, "HUUUUUUUUY.txt"); //"PROGRAMM_CODE_1.txt";
+            strcpy(output_file.name, "PROGRAMM_CODE_1.txt"); 
             break;
         }
 
@@ -42,13 +42,14 @@ int main()
 
     OutputFile(&input_file, &output_file);
 
-    printf("Your code in output from assembler:\n");
+    printf("output from buffer:\n");
     printf("size_of_code: %d\n", output_file.size_of_code);
     for(int i = 0; i < output_file.size_of_code; i++)
     {
         printf("%d\n", output_file.buffer[i] );
     }
     printf("\n\n");
+
 
     free(input_file.buffer);
     free(output_file.buffer);

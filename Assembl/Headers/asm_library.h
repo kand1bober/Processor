@@ -1,7 +1,18 @@
+#include <stdint.h>
 #include <stdlib.h>
 
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER
+
+typedef int AssemblerElem;
+
+struct Header
+{
+    uint32_t sign;
+    uint32_t ver;
+    uint32_t size;
+    uint32_t reserved;
+};
 
 enum commands
 {

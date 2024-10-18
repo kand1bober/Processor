@@ -1,9 +1,12 @@
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_macros.h"
+#include <cstddef>
 
-void Run(int* command_line, size_t size)
-{
+void Run(int* command_line, size_t size_of_code)
+{   
+    printf("Run processor:\n\n");
+
     struct SPU flow = {};
     
     STACK_CTOR_CALL(&flow.stack, START_CAPACITY);
@@ -15,15 +18,15 @@ void Run(int* command_line, size_t size)
         // scanf("%d", &command);
 
         int command = *(command_line + flow.IP);
-        if (flow.IP < size)
+        if ( (size_t)flow.IP < size_of_code)
         {
-            printf("%d\n", flow.IP);
+            // printf("%d\n", flow.IP);
 
             switch(command)
             {
                 case kPush:
                 {
-                    printf("Push\n");
+                    // printf("Push\n");
                     ProcElem arg = 0;
                     // scanf("%d", &arg);
                     
@@ -38,7 +41,7 @@ void Run(int* command_line, size_t size)
 
                 case kOut:
                 {
-                    printf("Out\n");
+                    // printf("Out\n");
                     ProcElem arg = 0;
                     flow.IP += 1;
                     arg = STACK_POP_CALL(&flow.stack);
@@ -49,15 +52,17 @@ void Run(int* command_line, size_t size)
 
                 case kIn:
                 {
-                    printf("In\n");
+                    // printf("In\n");
                     ProcElem arg = 0;
                     scanf("%d", &arg);
                     STACK_PUSH_CALL(&flow.stack, arg);
+                    PAUSE;
+                    continue;
                 }
 
                 case kAdd:
                 {
-                    printf("Add\n");
+                    // printf("Add\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
                     ProcElem b = STACK_POP_CALL(&flow.stack);
 
@@ -66,9 +71,10 @@ void Run(int* command_line, size_t size)
                     PAUSE;
                     continue;
                 }
+
                 case kSub:
                 {
-                    printf("Sub\n");
+                    // printf("Sub\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
                     ProcElem b = STACK_POP_CALL(&flow.stack);
 
@@ -81,7 +87,7 @@ void Run(int* command_line, size_t size)
 
                 case kMul:
                 {
-                    printf("Mul\n");
+                    // printf("Mul\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
                     ProcElem b = STACK_POP_CALL(&flow.stack);
 
@@ -94,7 +100,7 @@ void Run(int* command_line, size_t size)
 
                 case kDiv:
                 {
-                    printf("Div\n");
+                    // printf("Div\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
                     ProcElem b = STACK_POP_CALL(&flow.stack);
 
@@ -107,7 +113,7 @@ void Run(int* command_line, size_t size)
 
                 case kSin:
                 {
-                    printf("Sin\n");
+                    // printf("Sin\n");
                     //delete, when make on double
                     ProcElem a = STACK_POP_CALL(&flow.stack);
                 
@@ -119,7 +125,7 @@ void Run(int* command_line, size_t size)
 
                 case kCos:
                 {
-                    printf("Cos\n");
+                    // printf("Cos\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
 
                     flow.IP += 1;
@@ -131,7 +137,7 @@ void Run(int* command_line, size_t size)
 
                 case kRoot:
                 {
-                    printf("Root\n");
+                    // printf("Root\n");
                     ProcElem a = STACK_POP_CALL(&flow.stack);
 
                     flow.IP += 1;
@@ -143,7 +149,7 @@ void Run(int* command_line, size_t size)
 
                 case kDump:
                 {
-                    printf("Dump\n");
+                    // printf("Dump\n");
                     #ifdef DEBUG_STACK_FUNCS
                         StackDump(&flow.stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
                     #endif

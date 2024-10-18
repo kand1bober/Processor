@@ -1,7 +1,5 @@
-#include "../../Parser/Headers/pars_library.h"
 #include "../Headers/asm_functions.h"
 #include "../Headers/asm_library.h"
-#include "../../Parser/Headers/pars_library.h"
 
 int main()
 {
@@ -43,8 +41,8 @@ int main()
     OutputFile(&input_file, &output_file);
 
     printf("output from buffer:\n");
-    printf("size_of_code: %d\n", output_file.size_of_code);
-    for(int i = 0; i < output_file.size_of_code; i++)
+    printf("size_of_code: %d\n", output_file.head.size_of_code);
+    for(uint32_t i = 0; i < output_file.head.size_of_code; i++)
     {
         printf("%d\n", output_file.buffer[i] );
     }

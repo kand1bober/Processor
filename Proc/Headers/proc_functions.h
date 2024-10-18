@@ -6,16 +6,23 @@
 
 #include "proc_library.h"
 
-#include "MyStackLib.h"
+// #include "MyStackLib.h"
 
 #ifndef PROC_FUNCTIONS_HEADER
 #define PROC_FUNCTIONS_HEADER
 
+struct Header
+{
+    uint32_t sign;
+    uint32_t ver;
+    uint32_t size_of_code;
+    uint32_t reserved;
+};
+
 struct File_proc 
 {
+    Header head;
     char name[30];
-    char author[30];
-    size_t size_of_code;
     ProcElem* buffer;
 };
 

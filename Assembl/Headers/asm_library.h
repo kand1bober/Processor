@@ -4,15 +4,10 @@
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER
 
-typedef int AssemblerElem;
+const uint32_t SIGNATURE = 0x56564b;
+const uint32_t VERSION = 2;
 
-struct Header
-{
-    uint32_t sign;
-    uint32_t ver;
-    uint32_t size;
-    uint32_t reserved;
-};
+typedef int AssemblerElem;
 
 enum commands
 {

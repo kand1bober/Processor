@@ -7,7 +7,12 @@ int main()
 
     InputFileCode(&file);
 
-    Run(file.buffer, file.size_of_code);
+    for(int i = 0; i < file.head.size_of_code; i++)
+    {
+        printf("%d\n", *(file.buffer + i) );
+    }
+
+    Run(file.buffer, file.head.size_of_code);
 
     free(file.buffer);
 

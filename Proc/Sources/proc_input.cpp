@@ -1,6 +1,5 @@
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_library.h"
-#include "../../Parser/Headers/pars_library.h"
 
 void InputFileCode(struct File_proc* file)
 {
@@ -38,49 +37,32 @@ void InputFileCode(struct File_proc* file)
     sprintf(filepath, "%s%s", directory, filename);
     //==============================================
 
-    //====OPEN FILE AND CREATE CHAR BUFFER====TAKE AUTHOR AND SIZE_OF_CODE====
-    FILE* input_file = fopen(filepath, "r");
+    //====OPEN FILE AND CREATE CHAR BUFFER===========
+    FILE* input_file = fopen(filepath, "rb");
 
     struct stat file_info = {};
 
     stat(filepath, &file_info);
 
     unsigned long int size_of_stream = (unsigned long int)file_info.st_size;
-    printf("size of file: %lu\n", size_of_stream);
 
-    char* char_buffer = (char*)calloc( size_of_stream + 1, sizeof(char) );
+    ON_DEBUG( printf("size of file: %lu\n", size_of_stream); )
 
+    //=========REAADING_HEADER=====================
     fseek(input_file, sizeof(char) * 0L,  SEEK_SET);
-    fread( (void*)char_buffer, sizeof(char), size_of_stream, input_file);
+    fread(&file->head, sizeof(file->head), 1, input_file);
+
+    file->buffer = (ProcElem*)calloc(file->head.size_of_code, sizeof(ProcElem) );
+    printf("Header:\n"
+           "author: %X\n"
+           "size_of_code:%d\n"
+           "version of coding: %d\n\n", file->head.sign, file->head.size_of_code, file->head.ver);
+
+    // fseek(input_file, sizeof(char) * 16L,  SEEK_SET);
+    printf("Position: %ld\n", ftell(input_file) );
+
+    fread( file->buffer, sizeof(ProcElem), file->head.size_of_code, input_file); assert(fread);
     fclose(input_file);
-   
-
-    int position = 0;
-    sscanf(char_buffer, "%s", file->author);
-    position += ( strlen(file->author) + 1);
-    char size_of_code_tmp[5];
-    sscanf(char_buffer + position, "%s", size_of_code_tmp);
-
-    file->size_of_code = atoi(size_of_code_tmp);
-    position += ( strlen(size_of_code_tmp) + 1 );
-
-    printf("author: %s\n", file->author);
-    printf("size: %ld\n", file->size_of_code);
-
-    //=================================================================
-
-    file->buffer = (int*)calloc(file->size_of_code, sizeof(int) );
-
-    for (int i = 0; i < file->size_of_code; i++)
-    {
-        memcpy( (void*)(file->buffer + i), (void*)(char_buffer + position + sizeof(int) * i), 4);
-    }
-
-    for (int i = 0; i < file->size_of_code; i++)
-    {
-        printf("[%d]: %d\n", i, *(file->buffer + i) );
-    }
-
-    free(char_buffer);
+   //====================================================
 }
 

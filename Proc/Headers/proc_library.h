@@ -29,10 +29,13 @@ enum commands
     kJbe = 16,
     kJe = 17,
     kJne = 18,
-    KJmp = 19,
+    kJmp = 19,
 
     kPushR = 20,
     kOutR = 21,
+    AX = 22,
+    BX = 23,
+    CX = 24,
 };
 
 struct SPU

@@ -1,7 +1,6 @@
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_macros.h"
-#include <cstddef>
 
 void Run(int* command_line, size_t size_of_code)
 {   
@@ -14,9 +13,6 @@ void Run(int* command_line, size_t size_of_code)
     flow.IP = 0;
     while(1)
     {
-        // int16_t command = 0;
-        // scanf("%d", &command);
-
         int command = *(command_line + flow.IP);
         if ( (size_t)flow.IP < size_of_code)
         {
@@ -28,7 +24,6 @@ void Run(int* command_line, size_t size_of_code)
                 {
                     // printf("Push\n");
                     ProcElem arg = 0;
-                    // scanf("%d", &arg);
                     
                     flow.IP += 1;
                     arg = *(command_line + flow.IP);
@@ -166,6 +161,157 @@ void Run(int* command_line, size_t size_of_code)
                     printf("Processor stopped\n");
                     PAUSE;
                     break;
+                }
+
+                case kPushR:
+                {
+                    flow.IP++;
+                    if( *(command_line + flow.IP) == AX )
+                    {
+                        flow.AX = STACK_POP_CALL(&flow.stack);
+                        flow.IP++;
+                    }
+
+                    else if( *(command_line + flow.IP) == BX )
+                    {
+                        flow.BX = STACK_POP_CALL(&flow.stack);
+                        flow.IP++;
+                    }
+                    else if( *(command_line + flow.IP) == CX )
+                    {
+                        flow.CX = STACK_POP_CALL(&flow.stack);
+                        flow.IP++;
+                    }
+                }
+
+                case kOutR:
+                {
+
+                }
+
+                case kJa:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b > a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;                                                            
+                }
+
+                case kJae:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b >= a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;                                                            
+                }
+
+                case kJb:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b < a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;                                                            
+                }
+
+                case kJbe:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b <= a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;                                                            
+                }
+
+                case kJe:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b == a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;                                                            
+                }
+
+                case kJne:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    if(b != a)
+                        flow.IP = jump;
+                    else
+                        flow.IP++;
+                    continue;    
+                }
+                
+                case kJmp:
+                {
+                    uint32_t jump = 0;
+                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem b = STACK_POP_CALL(&flow.stack);
+
+                    STACK_PUSH_CALL(&flow.stack, b);
+                    STACK_PUSH_CALL(&flow.stack, a);
+                    flow.IP++;
+                    jump = *(command_line + flow.IP);
+                    
+                    flow.IP = jump;
+                    flow.IP++;
+
+                    continue;    
                 }
 
                 case kNull:

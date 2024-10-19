@@ -23,7 +23,13 @@ struct File_proc
 {
     Header head;
     char name[30];
-    ProcElem* buffer;
+    ProcElem* buffer; 
+};
+
+struct Line_ptr
+{
+    char* begin;    
+    int length;
 };
 
 void Run(int* command_line, size_t size);

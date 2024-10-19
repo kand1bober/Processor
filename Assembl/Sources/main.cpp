@@ -40,17 +40,10 @@ int main()
 
     OutputFile(&input_file, &output_file);
 
-    printf("output from buffer:\n");
-    printf("size_of_code: %d\n", output_file.head.size_of_code);
-    for(uint32_t i = 0; i < output_file.head.size_of_code; i++)
-    {
-        printf("%d\n", output_file.buffer[i] );
-    }
-    printf("\n\n");
-
-
     free(input_file.buffer);
     free(output_file.buffer);
+
+    free(input_file.lines_arr);
 
     return 0;
 }

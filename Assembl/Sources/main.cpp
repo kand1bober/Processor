@@ -38,10 +38,12 @@ int main()
 
     InputFileStruct(&input_file); 
 
-    OutputFile(&input_file, &output_file);
+    OutputBuffer(&input_file, &output_file.output_buffer);
+
+    OutputFile(&output_file);
 
     free(input_file.buffer);
-    free(output_file.buffer);
+    free(output_file.output_buffer.buffer);
 
     free(input_file.lines_arr);
 

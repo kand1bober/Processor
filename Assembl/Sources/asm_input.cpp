@@ -32,12 +32,12 @@ void InputFileStruct(struct File_asm* file)
     CountManAndArg(file);
 
     printf("amount of lines: %d\nsize of code: %d\n", file->lines_amount, file->size_of_code);
-    printf("Strings printed by pointers to them:\n");
-    for(int i = 0; i < file->lines_amount; i++)
-    {
-        printf("%3d:  %-13s   length: %d\n", i + 1, file->lines_arr[i].start, file->lines_arr[i].length);
-    }
-    printf("\n\n");
+    // printf("Strings printed by pointers to them:\n");
+    // for(int i = 0; i < file->lines_amount; i++)
+    // {
+    //     printf("%3d:  %-13s   length: %d\n", i , file->lines_arr[i].start, file->lines_arr[i].length);
+    // }
+    // printf("\n\n");
 }
 //=================================================
 
@@ -47,7 +47,7 @@ void CreateLinePointers(struct File_asm* file)
 {   
     for(int i = 0; i < file->size_of_file; i++)
     {
-        if ( file->buffer[i] == '\n' )
+        if ( file->buffer[i] == '\n' )  
         {
             file->buffer[i] = '\0';
             (file->lines_amount)++;

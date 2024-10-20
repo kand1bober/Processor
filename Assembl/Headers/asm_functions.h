@@ -11,7 +11,6 @@
 #define ASM_FUNCTIONS_HEADER
 
 void OutputFile(struct File_code* file);
-// void OutputFile(struct File_asm* file_a, struct File_code* file_b);
 void InputFileStruct(struct File_asm* file);
 void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output);
 void CreateLinePointers(struct File_asm* file);
@@ -22,6 +21,9 @@ void GetArgPop(struct Line_ptr* line, struct Output_buffer* output);
 int GetName( char* command_name, struct Output_buffer* output, struct Cmd_strings* array, int size);
 int GetArgPush(struct Output_buffer* output, struct Line_ptr* line);
 int GetArgPop(struct Output_buffer* output, struct Line_ptr* line);
+
+void BinaryIntOutput(int number);
+void BinaryCharOutput(char number);
 
 struct Line_ptr
 {
@@ -60,5 +62,10 @@ struct File_code
     char name[30];
     Output_buffer output_buffer;
 };
+
+
+const unsigned char MEMORY_MASK = 128;
+const unsigned char REGISTER_MASK = 64;
+const unsigned char INPUT_MASK = 32;
 
 #endif

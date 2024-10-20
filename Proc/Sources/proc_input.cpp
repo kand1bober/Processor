@@ -52,7 +52,7 @@ void InputFileCode(struct File_proc* file)
     fseek(input_file, sizeof(char) * 0L,  SEEK_SET);
     fread(&file->head, sizeof(file->head), 1, input_file);
 
-    file->buffer = (ProcElem*)calloc(file->head.size_of_code, sizeof(ProcElem) );
+    file->buffer = (char*)calloc(file->head.size_of_code, sizeof(char) );
     printf("Header:\n"
            "author: %X\n"
            "size_of_code:%d\n"
@@ -61,7 +61,7 @@ void InputFileCode(struct File_proc* file)
     // fseek(input_file, sizeof(char) * 16L,  SEEK_SET);
     printf("Position: %ld\n", ftell(input_file) );
 
-    fread( file->buffer, sizeof(ProcElem), file->head.size_of_code, input_file); assert(fread);
+    fread( file->buffer, sizeof(char), file->head.size_of_code, input_file); assert(fread);
     fclose(input_file);
    //====================================================
 }

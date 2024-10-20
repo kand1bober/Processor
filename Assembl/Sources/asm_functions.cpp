@@ -3,6 +3,7 @@
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
+#include "../Headers/asm_decoration.h"
 
 //=====CONVERT TO CODE AND WRITE IN OUTPUT======
 
@@ -19,6 +20,7 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
     {
         sscanf( file_a->lines_arr[i].start, "%s", command_buffer_1 );
         sprintf( command_name, "k%c%s", toupper( command_buffer_1[0] ), command_buffer_1 + 1);
+        printf("\n");
         printf("iteration %d:   %s\n", i, command_name );
 
         //====Fill char array with coomands and argumants===
@@ -69,6 +71,7 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         {"kCX", kCX},
         {"kIP", kIP},
     };
+    
     int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
 
     int status = GetName( command_name, output, CmdArray, size );
@@ -131,22 +134,121 @@ int GetName( char* command_name, struct Output_buffer* output, struct Cmd_string
 
 int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
 {
-    int arg = 0;
-    int status = sscanf( line->start + strlen("kPush"), "%d", &arg);
-    if ( status )
+    AssemblerElem arg = 0;
+
+    char* buffer = line->start + strlen("Push") + 1;
+    
+
+    if ( ( buffer = strchr( buffer, '[' ) ) != nullptr)
     {
-        printf("arg: %d\n", arg);
+        *(output->buffer + output->ip - 1) |= MEMORY_MASK;
 
-        *(int*)(output->buffer + output->ip) = arg;
-        output->ip += sizeof(AssemblerElem);
+        if ( strchr( buffer, ']' ) != nullptr )
+            ;
+        else
+            printf(RED "Warning: No closing bracket :(\n" DELETE_COLOR);
 
-        return 0;
+        // printf("pos1: %p, ch: %c\n", buffer, *buffer);
+        // printf("pos2:  %p, ch: %c\n", buffer, *buffer);
+        // printf("string: %s\n", buffer);
+
+        buffer += 2;
+
+        if ( strncmp( buffer, "AX", 2 ) == 0 )
+        {
+            // printf(RED "Memory with regs:\n" DELETE_COLOR);
+            // printf(RED "reg AX:\n" DELETE_COLOR);
+
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kAX;
+            return 0;
+        }
+        else if ( strncmp( buffer, "BX", 2 ) == 0 )
+        {
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kBX;
+            return 0;
+        }
+        else if( strncmp( buffer, "CX", 2 ) == 0 )
+        {
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kCX;
+            return 0;
+        }
+        else 
+        {
+            // printf(RED "onlu mamory:\n" DELETE_COLOR);
+            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            return 0;
+        }
     }
     else
     {
-        // printf("arg: huy\n");
-        return 1;
-    }
+        buffer = line->start + strlen("Push") + 1;
+
+        // printf("No []: \n");
+        // printf("pos:  %d\n", output->ip);
+        // printf("%s\n", output->buffer + output->ip);
+        // printf(RED "only regs :\n" DELETE_COLOR);
+
+        if ( strncmp( buffer, "AX", 2 ) == 0 )
+        {
+            // printf(RED "reg AX:" DELETE_COLOR);
+
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kAX;
+            return 0;
+        }
+        else if ( strncmp( buffer, "BX", 2 ) == 0 )
+        {
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kBX;
+            return 0;
+        }
+        else if( strncmp( buffer, "CX", 2 ) == 0 )
+        {
+            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); 
+
+            *( output->buffer + (output->ip++) ) = kCX;
+            return 0;
+        }
+        else 
+        {
+
+            buffer = line->start + strlen("Push");
+            *(output->buffer + output->ip - 1) |= INPUT_MASK;
+
+            // printf("simple input\n");
+            // printf("pos:  %d\n", output->ip);
+            if ( sscanf( buffer, "%d", &arg ) == 1 )
+            {
+                printf("arg: %d\n", arg);
+                *(int*)( output->buffer + output->ip ) = arg;
+                BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
+                printf(" ");
+                BinaryIntOutput( *(int*)( output->buffer + output->ip ) );
+
+                output->ip += sizeof( AssemblerElem );
+            }
+            else 
+            {
+                return -1;
+            }
+        }
+    } 
+    return -2; // kakoyto pizdec
 }
 
 
@@ -154,7 +256,7 @@ int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)
 {
     int arg = 0;
 
-    if ( sscanf( line->start + strlen("kPop"), "%d", &arg) == 1 )
+    if ( sscanf( line->start + strlen("Pop"), "%d", &arg) == 1 )
     {
         printf("arg: %d\n", arg);   
 
@@ -182,7 +284,7 @@ void OutputFile(struct File_code* file)
 
     FILE* output_stream = fopen(filepath, "wb");
 
-    file->head.size_of_code = file->output_buffer.ip ;
+    file->head.size_of_code = file->output_buffer.ip;
     file->head.sign = SIGNATURE;
     file->head.ver = VERSION;
 
@@ -191,3 +293,23 @@ void OutputFile(struct File_code* file)
     fclose(output_stream);
     //==============================================
 }
+
+
+void BinaryCharOutput(char number)
+{
+    int l = 8 *  sizeof(number);
+    for (int i = l - 1; i >= 0; i--)
+    {
+        printf("%X", (unsigned)((number & (1 << i)) >> i) );
+    }
+}
+
+void BinaryIntOutput(int number)
+{
+    int l = 8 *  sizeof(number);
+    for (int i = l - 1; i >= 0; i--)
+    {
+        printf("%X", (unsigned)((number & (1 << i)) >> i) );
+    }
+}
+

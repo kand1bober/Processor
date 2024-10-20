@@ -23,7 +23,7 @@ struct File_proc
 {
     Header head;
     char name[30];
-    ProcElem* buffer; 
+    char* buffer; 
 };
 
 struct Line_ptr
@@ -32,7 +32,8 @@ struct Line_ptr
     int length;
 };
 
-void Run(int* command_line, size_t size);
+void Run(char* command_line, size_t size);
 void InputFileCode(struct File_proc* file);
+void BinaryOutput(int number);
 
 #endif

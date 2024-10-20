@@ -5,44 +5,46 @@
 #ifndef PROC_LIBRARY_HEADER
 #define PROC_LIBRARY_HEADER
 
+const uint32_t SIGNATURE = 0x56564b;
+const uint32_t VERSION = 2;
+
 typedef int ProcElem;
 
 enum commands
 {
     kNull = 0,
     kPush = 1,
-    kOut = 2,
-    kAdd = 3,
-    kIn = 4,
-    kSub = 5,
-    kMul = 6,
-    kDiv = 7,
-    kRoot = 8,
-    kSin = 9,
-    kCos = 10,
-    kDump = 11,
-    kHlt = 12,
+    kPop = 2,
+    kOut = 3,
+    kAdd = 4,
+    kIn = 5,
+    kSub = 6,
+    kMul = 7,
+    kDiv = 8,
+    kRoot = 9,
+    kSin = 10,
+    kCos = 11,
+    kDump = 12,
+    kHlt = 13,
 
-    kJa = 13,
-    kJae = 14,
-    kJb = 15,
-    kJbe = 16,
-    kJe = 17,
-    kJne = 18,
-    kJmp = 19,
+    kJa = 14,
+    kJae = 15,
+    kJb = 16,
+    kJbe = 17,
+    kJe = 18,
+    kJne = 19,
+    kJmp = 20,
 
-    kPushR = 20,
-    kOutR = 21,
-    AX = 22,
-    BX = 23,
-    CX = 24,
+    kAX = 21,
+    kBX = 22,
+    kCX = 23,
+    kIP = 24,
 };
 
 struct SPU
 {
     Stack_t stack;
 
-    //registers, maybe, should make separete structure
     int16_t AX;
     int16_t BX;
     int16_t CX;

@@ -5,7 +5,7 @@
 #define ASSEMBLER_LIBRARY_HEADER
 
 const uint32_t SIGNATURE = 0x56564b;
-const uint32_t VERSION = 2;
+const uint32_t VERSION = 3;
 
 typedef int AssemblerElem;
 
@@ -42,7 +42,7 @@ enum Commands
 
 struct Cmd_strings
 {
-    char  name[10];
+    char name[10];
     enum Commands number;
 };
 

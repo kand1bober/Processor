@@ -10,20 +10,33 @@
 #ifndef ASM_FUNCTIONS_HEADER
 #define ASM_FUNCTIONS_HEADER
 
+//==============INPUT=====================
 void OutputFile(struct File_code* file);
 void InputFileStruct(struct File_asm* file);
 void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output);
 void CreateLinePointers(struct File_asm* file);
 void CountManAndArg(struct File_asm* file);
+//========================================
+
+//============GET ARGUMENT FOR FUNCITONS WITH ARGUMENTS============
 void GetArg(char* command_buffer, struct Line_ptr* line, struct Output_buffer* output);
-void GetArgPush(struct Line_ptr* line, struct Output_buffer* output);
-void GetArgPop(struct Line_ptr* line, struct Output_buffer* output);
 int GetName( char* command_name, struct Output_buffer* output, struct Cmd_strings* array, int size);
 int GetArgPush(struct Output_buffer* output, struct Line_ptr* line);
 int GetArgPop(struct Output_buffer* output, struct Line_ptr* line);
+//==================================================================
 
+//=========LABLE TABLE==============================================
+void LabelTableCtor(struct Label_table* spisok);
+void LabelTableDtor(struct Label_table* spisok);
+void FindLabels(struct Label_table* spisok, struct File_asm* file);
+int WriteLabel(struct Label_table* spisok, char* ptr, size_t length);
+char* SkipSpaces(char* ptr);
+//==================================================================
+
+//========ADDITIONAL===============
 void BinaryIntOutput(int number);
 void BinaryCharOutput(char number);
+//=================================
 
 struct Line_ptr
 {

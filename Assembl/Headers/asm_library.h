@@ -1,8 +1,11 @@
+#include <cmath>
 #include <stdint.h>
 #include <stdlib.h>
 
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER
+
+const int LABEL_ARR_SIZE = 20;
 
 const uint32_t SIGNATURE = 0x56564b;
 const uint32_t VERSION = 3;
@@ -26,24 +29,37 @@ enum Commands
     kDump = 12,
     kHlt = 13,
 
-    kJa = 14,
-    kJae = 15,
-    kJb = 16,
-    kJbe = 17,
-    kJe = 18,
-    kJne = 19,
-    kJmp = 20,
+    kAX = 14,
+    kBX = 15,
+    kCX = 16,
+    kIP = 17,
 
-    kAX = 21,
-    kBX = 22,
-    kCX = 23,
-    kIP = 24,
+    kJa = 18,
+    kJae = 19,
+    kJb = 20,
+    kJbe = 21,
+    kJe = 22,
+    kJne = 23,
+    kJmp = 24,
+    kJmpspace = 25,
 };
 
 struct Cmd_strings
 {
     char name[10];
     enum Commands number;
+};
+
+struct Label 
+{
+    char name[10];
+    int labe_ip;
+};
+
+struct Label_table
+{
+    Label* labels;
+    int amount;
 };
 
 #endif

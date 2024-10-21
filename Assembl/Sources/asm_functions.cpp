@@ -1,43 +1,47 @@
+#define PRINT_DEBUG
+
+
 #include <string.h>
 #include <ctype.h>
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
 #include "../Headers/asm_decoration.h"
+#include "../Headers/asm_macros.h"
+
+
 
 //=====CONVERT TO CODE AND WRITE IN OUTPUT======
 
 // TODO: input.cpp
 void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 {
-    output->buffer = (char*)calloc(file_a->size_of_file, sizeof(char) );  //хуета
+    struct Label_table spisok_metok = {};
+    LabelTableCtor(&spisok_metok);
+
+    FindLabels(&spisok_metok, file_a);
+
+
+    output->buffer = (char*)calloc(file_a->size_of_file, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
     output->ip = 0;
 
-    char command_buffer_1[20] = {};
     char command_name[20] = {};
-
     for (int i = 0; i < file_a->lines_amount; i++)
     {
-        sscanf( file_a->lines_arr[i].start, "%s", command_buffer_1 );
-        sprintf( command_name, "k%c%s", toupper( command_buffer_1[0] ), command_buffer_1 + 1);
+        sscanf( file_a->lines_arr[i].start, "%s", command_name );
         printf("\n");
         printf("iteration %d:   %s\n", i, command_name );
-
-        //====Fill char array with coomands and argumants===
+        //====Fill char array with comands and argumants===
         GetArg( command_name, &file_a->lines_arr[i], output );
         //==================================================
         printf("\n");
     }
-    printf("\n");
-
     //============Check===============
-    // for(int i = 0; i < file_a->size_of_file; i++)
-    // {
-    //     printf("%d ", *(char*)(output->buffer + i) );
-    // }
-
-    printf("\nip: %d\n", output->ip);
+    printf("ip: %d\n", output->ip);
     //===============================
+
+
+    LabelTableDtor(&spisok_metok);
 }
 
 
@@ -45,31 +49,34 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 {
     struct Cmd_strings CmdArray[] = 
     {
-        {"kNull", kNull},
-        {"kPush", kPush},
-        {"kPop", kPop},
-        {"kOut", kOut},
-        {"kAdd", kAdd},
-        {"kIn", kIn},
-        {"kSub", kSub},
-        {"kMul", kMul},
-        {"kDiv", kDiv},
-        {"kRoot", kRoot},
-        {"kSin", kSin},
-        {"kCos", kCos},
-        {"kDump", kDump},
-        {"kHlt", kHlt},
-        {"kJa", kJa},
-        {"kJae", kJae},
-        {"kJb", kJb},
-        {"kJbe", kJbe},
-        {"kJe", kJe},
-        {"kJne", kJne},
-        {"kJmp", kJmp},
-        {"kAX", kAX},
-        {"kBX", kBX},
-        {"kCX", kCX},
-        {"kIP", kIP},
+        {"null", kNull},
+        {"push", kPush},
+        {"pop", kPop},
+        {"out", kOut},
+        {"add", kAdd},
+        {"in", kIn},
+        {"sub", kSub},
+        {"mul", kMul},
+        {"div", kDiv},
+        {"root", kRoot},
+        {"sin", kSin},
+        {"cos", kCos},
+        {"dump", kDump},
+        {"hlt", kHlt},
+
+        {"AX", kAX},
+        {"BX", kBX},
+        {"CX", kCX},
+        {"IP", kIP},
+        
+        {"ja", kJa},
+        {"jae", kJae},
+        {"jb", kJb},
+        {"jbe", kJbe},
+        {"je", kJe},
+        {"jne", kJne},
+        {"jmp", kJmp},
+        {"jmpspace", kJmpspace},
     };
     
     int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
@@ -78,7 +85,9 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 
     if( status == 0)
     {   
-        if ( *(char*)(output->buffer + output->ip - 1) == kPush)
+        char command_code = *(char*)(output->buffer + output->ip - 1 );
+
+        if ( command_code == kPush)
         {
             GetArgPush(output, line);
         }
@@ -87,9 +96,13 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
             GetArgPop(output, line);
         }
         // TODO: add Jumps and two-stage processing 
-        // else if ( *(int*)(output->buffer + output->ip) == kJa) 
-        // {
 
+        // if( ( command_code == kJa ) && ( command_code == kJae ) && 
+        //     ( command_code == kJb ) && ( command_code == kJbe ) && 
+        //     ( command_code == kJe ) && ( command_code == kJne ) && 
+        //     ( command_code == kJmp) ) 
+        // {
+        //     GetJumpIp(output, );
         // }
         else 
         {
@@ -107,27 +120,35 @@ int GetName( char* command_name, struct Output_buffer* output, struct Cmd_string
 {
     int status = -1;
 
-    for(int i = 0; i < size; i++ )
+    for(int i = 0; (i < size) && (status != 0) ; i++ )
     {
         if ( strcmp ( array[i].name , command_name ) == 0 )
         {
-            *(char*)(output->buffer + output->ip) = array[i].number;
+            *(char*)( output->buffer + output->ip ) = array[i].number;
             printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
             output->ip += 1;
-
             // printf("command from input: %s command from array: %s number from enum: %d\n", command_name, array[i].name, array[i].number);
             status = 0;
         }
+        else
+        {
+            status = -1;
+        }
     }
 
-    if ( status == 0)
+    //if ( SearchLabel( command_name, ) )  //TODO: переебать функции связвнные с метками, пока похуй
+    if ( status == 0 )
     {
-        return 0;
+        return status;
     }
     else 
     {
-        printf("wrong command\n");
-        return -1;
+        *(char*)( output->buffer + output->ip ) = kJmpspace;
+        printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
+        output->ip += 1;
+
+        // printf("wrong command\n");
+        return status;
     }
 }
 
@@ -160,7 +181,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
             // printf(RED "reg AX:\n" DELETE_COLOR);
 
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kAX;
             return 0;
@@ -168,7 +190,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else if ( strncmp( buffer, "BX", 2 ) == 0 )
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kBX;
             return 0;
@@ -176,7 +199,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else if( strncmp( buffer, "CX", 2 ) == 0 )
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
 
             *( output->buffer + (output->ip++) ) = kCX;
             return 0;
@@ -184,7 +208,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else 
         {
             // printf(RED "onlu mamory:\n" DELETE_COLOR);
-            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
 
             return 0;
         }
@@ -203,7 +227,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
             // printf(RED "reg AX:" DELETE_COLOR);
 
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput( *( output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kAX;
             return 0;
@@ -211,7 +236,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else if ( strncmp( buffer, "BX", 2 ) == 0 )
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kBX;
             return 0;
@@ -219,7 +245,8 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else if( strncmp( buffer, "CX", 2 ) == 0 )
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-            BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); 
+
+            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kCX;
             return 0;
@@ -236,9 +263,13 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
             {
                 printf("arg: %d\n", arg);
                 *(int*)( output->buffer + output->ip ) = arg;
-                BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
-                printf(" ");
-                BinaryIntOutput( *(int*)( output->buffer + output->ip ) );
+
+                ON_DEBUG
+                (
+                    BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
+                    printf(" ");
+                    BinaryIntOutput( *(int*)( output->buffer + output->ip ) );
+                )
 
                 output->ip += sizeof( AssemblerElem );
             }
@@ -300,16 +331,16 @@ void BinaryCharOutput(char number)
     int l = 8 *  sizeof(number);
     for (int i = l - 1; i >= 0; i--)
     {
-        printf("%X", (unsigned)((number & (1 << i)) >> i) );
+        printf(YELLOW "%X" DELETE_COLOR , (unsigned)((number & (1 << i)) >> i) );
     }
 }
+
 
 void BinaryIntOutput(int number)
 {
     int l = 8 *  sizeof(number);
     for (int i = l - 1; i >= 0; i--)
     {
-        printf("%X", (unsigned)((number & (1 << i)) >> i) );
+        printf(YELLOW "%X" DELETE_COLOR, (unsigned)((number & (1 << i)) >> i) );
     }
 }
-

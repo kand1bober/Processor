@@ -27,18 +27,19 @@ enum commands
     kDump = 12,
     kHlt = 13,
 
-    kJa = 14,
-    kJae = 15,
-    kJb = 16,
-    kJbe = 17,
-    kJe = 18,
-    kJne = 19,
-    kJmp = 20,
+    kAX = 14,
+    kBX = 15,
+    kCX = 16,
+    kIP = 17,
 
-    kAX = 21,
-    kBX = 22,
-    kCX = 23,
-    kIP = 24,
+    kJa = 18,
+    kJae = 19,
+    kJb = 20,
+    kJbe = 21,
+    kJe = 22,
+    kJne = 23,
+    kJmp = 24,
+    kJmpspace = 25,
 };
 
 struct SPU

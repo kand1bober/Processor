@@ -19,10 +19,16 @@ void CountManAndArg(struct File_asm* file);
 //========================================
 
 //============GET ARGUMENT FOR FUNCITONS WITH ARGUMENTS============
-void GetArg(char* command_buffer, struct Line_ptr* line, struct Output_buffer* output);
-int GetName( char* command_name, struct Output_buffer* output, struct Cmd_strings* array, int size);
+void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output, struct Label_table* spisok);
+int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, struct Cmd_strings* array, int size);
+
+//====================SPECIAL COMMANDS=============================
 int GetArgPush(struct Output_buffer* output, struct Line_ptr* line);
 int GetArgPop(struct Output_buffer* output, struct Line_ptr* line);
+
+const int MODE_1 = 1;
+const int MODE_2 = 2;
+int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok);
 //==================================================================
 
 //=========LABLE TABLE==============================================
@@ -30,6 +36,8 @@ void LabelTableCtor(struct Label_table* spisok);
 void LabelTableDtor(struct Label_table* spisok);
 void FindLabels(struct Label_table* spisok, struct File_asm* file);
 int WriteLabel(struct Label_table* spisok, char* ptr, size_t length);
+Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t size );
+void LabelDump(struct Label_table* spisok);
 char* SkipSpaces(char* ptr);
 //==================================================================
 

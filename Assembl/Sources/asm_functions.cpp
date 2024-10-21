@@ -1,4 +1,4 @@
-#define PRINT_DEBUG
+// #define PRINT_DEBUG
 
 
 #include <string.h>
@@ -16,10 +16,10 @@
 // TODO: input.cpp
 void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 {
-    struct Label_table spisok_metok = {};
-    LabelTableCtor(&spisok_metok);
+    struct Label_table spisok = {};
+    LabelTableCtor(&spisok);
 
-    FindLabels(&spisok_metok, file_a);
+    FindLabels(&spisok, file_a);
 
 
     output->buffer = (char*)calloc(file_a->size_of_file, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
@@ -32,7 +32,7 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
         printf("\n");
         printf("iteration %d:   %s\n", i, command_name );
         //====Fill char array with comands and argumants===
-        GetArg( command_name, &file_a->lines_arr[i], output );
+        GetArg( command_name, &file_a->lines_arr[i], output, &spisok);
         //==================================================
         printf("\n");
     }
@@ -40,12 +40,13 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
     printf("ip: %d\n", output->ip);
     //===============================
 
+    LabelDump(&spisok);
 
-    LabelTableDtor(&spisok_metok);
+    LabelTableDtor(&spisok);
 }
 
 
-void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output)
+void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output, struct Label_table* spisok)
 {
     struct Cmd_strings CmdArray[] = 
     {
@@ -81,7 +82,7 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
     
     int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
 
-    int status = GetName( command_name, output, CmdArray, size );
+    int status = GetName( command_name, output, spisok, CmdArray, size );
 
     if( status == 0)
     {   
@@ -91,36 +92,39 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         {
             GetArgPush(output, line);
         }
-        else if ( *(char*)(output->buffer + output->ip - 1 ) == kPop )
+        else if ( command_code == kPop )
         {
             GetArgPop(output, line);
         }
-        // TODO: add Jumps and two-stage processing 
-
-        // if( ( command_code == kJa ) && ( command_code == kJae ) && 
-        //     ( command_code == kJb ) && ( command_code == kJbe ) && 
-        //     ( command_code == kJe ) && ( command_code == kJne ) && 
-        //     ( command_code == kJmp) ) 
-        // {
-        //     GetJumpIp(output, );
-        // }
+        else if(( command_code == kJa ) || ( command_code == kJae ) || 
+                ( command_code == kJb ) || ( command_code == kJbe ) || 
+                ( command_code == kJe ) || ( command_code == kJne ) || 
+                ( command_code == kJmp)) 
+        {
+            GetArgJump(MODE_1, output, line, spisok);
+            // *(int*)(output->buffer + output->ip) = 0;
+            // output->ip += sizeof( AssemblerElem );
+        }
         else 
         {
-            printf("zero argumants\n");
+            // printf("zero argumants\n");
         }
     }
     else
     {
-        printf("wrong command\n");
+        // printf("wrong command\n");
     }
 }
 
 
-int GetName( char* command_name, struct Output_buffer* output, struct Cmd_strings* array, int size)
+int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, struct Cmd_strings* array, int size)
 {
-    int status = -1;
+    int status = 1;
+    Label* search = {};
 
-    for(int i = 0; (i < size) && (status != 0) ; i++ )
+    // printf(RED "length of command_name: %ld\n" DELETE_COLOR, strlen(command_name) );
+
+    for(int i = 0; (i < size); i++ )
     {
         if ( strcmp ( array[i].name , command_name ) == 0 )
         {
@@ -130,19 +134,14 @@ int GetName( char* command_name, struct Output_buffer* output, struct Cmd_string
             // printf("command from input: %s command from array: %s number from enum: %d\n", command_name, array[i].name, array[i].number);
             status = 0;
         }
-        else
-        {
-            status = -1;
-        }
     }
 
-    //if ( SearchLabel( command_name, ) )  //TODO: переебать функции связвнные с метками, пока похуй
-    if ( status == 0 )
+    if ( (status != 0) && ( search = SearchLabel(spisok, command_name, strlen(command_name) + 1) ) )
     {
-        return status;
-    }
-    else 
-    {
+        printf("Getname: only label\n");
+        search->label_ip = output->ip;
+        printf("found label: %d\n", search->label_ip);
+        status = 2;
         *(char*)( output->buffer + output->ip ) = kJmpspace;
         printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
         output->ip += 1;
@@ -150,6 +149,24 @@ int GetName( char* command_name, struct Output_buffer* output, struct Cmd_string
         // printf("wrong command\n");
         return status;
     }
+
+    if ( status == 0 )
+    {
+        return status;
+    }
+    else 
+    {
+        return 1;
+    }
+    // else if (status == 2)
+    // {
+    //     *(char*)( output->buffer + output->ip ) = kJmpspace;
+    //     printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
+    //     output->ip += sizeof( AssemblerElem );
+
+    //     // printf("wrong command\n");
+    //     return status;
+    // }
 }
 
 
@@ -175,7 +192,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
 
         buffer += 2;
 
-        if ( strncmp( buffer, "AX", 2 ) == 0 )
+        if ( strncmp( buffer, "AX", 2 ) == 0 )  //TODO: убрать копипаст ввода, вынести часть ввода в функцию и зать не только в GetArgPush и GetArgPop ни о в GetJumpArg
         {
             // printf(RED "Memory with regs:\n" DELETE_COLOR);
             // printf(RED "reg AX:\n" DELETE_COLOR);

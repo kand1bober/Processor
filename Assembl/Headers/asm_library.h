@@ -53,7 +53,7 @@ struct Cmd_strings
 struct Label 
 {
     char name[10];
-    int labe_ip;
+    int label_ip;
 };
 
 struct Label_table

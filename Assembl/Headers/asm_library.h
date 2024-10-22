@@ -54,12 +54,15 @@ struct Label
 {
     char name[10];
     int label_ip;
+    
 };
 
 struct Label_table
 {
     Label* labels;
     int amount;
+    int* jump_ip;
+    int jump_count;
 };
 
 #endif

@@ -1,8 +1,7 @@
-// #define PRINT_DEBUG
+#define PRINT_DEBUG
 
 
 #include <string.h>
-#include <ctype.h>
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
@@ -21,11 +20,12 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 
     FindLabels(&spisok, file_a);
 
-
+    
     output->buffer = (char*)calloc(file_a->size_of_file, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
     output->ip = 0;
-
     char command_name[20] = {};
+
+    //==================FIRST PROCESSING==========================
     for (int i = 0; i < file_a->lines_amount; i++)
     {
         sscanf( file_a->lines_arr[i].start, "%s", command_name );
@@ -36,9 +36,21 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
         //==================================================
         printf("\n");
     }
-    //============Check===============
-    printf("ip: %d\n", output->ip);
-    //===============================
+    printf("ip: %d\n", output->ip); //Check
+    // ===================END OF FIRST=============================
+
+
+    //===============SECOND PROCESSING=============================
+    printf("size: %d\n", spisok.jump_count);
+    int value = 0;
+    char* target = nullptr;
+    for(int i = 0; i < spisok.jump_count; i++)
+    {
+        value = spisok.labels[i].label_ip;
+        target = output->buffer + spisok.jump_ip[i]; 
+        memcpy(target, &value, sizeof(int) );  //TODO: зависит ли от типа ?
+    }
+    //=================END OF SECOND===============================
 
     LabelDump(&spisok);
 
@@ -102,8 +114,6 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
                 ( command_code == kJmp)) 
         {
             GetArgJump(MODE_1, output, line, spisok);
-            // *(int*)(output->buffer + output->ip) = 0;
-            // output->ip += sizeof( AssemblerElem );
         }
         else 
         {
@@ -158,15 +168,6 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
     {
         return 1;
     }
-    // else if (status == 2)
-    // {
-    //     *(char*)( output->buffer + output->ip ) = kJmpspace;
-    //     printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
-    //     output->ip += sizeof( AssemblerElem );
-
-    //     // printf("wrong command\n");
-    //     return status;
-    // }
 }
 
 

@@ -18,9 +18,15 @@ void CreateLinePointers(struct File_asm* file);
 void CountManAndArg(struct File_asm* file);
 //========================================
 
+
 //============GET ARGUMENT FOR FUNCITONS WITH ARGUMENTS============
+//=====================FIRST PROCESSING============================
 void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output, struct Label_table* spisok);
 int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, struct Cmd_strings* array, int size);
+//=============SECOND PROCESSING===================================
+void FillArrayOfJumps(struct Label_table* spisok, int ip);
+//=================================================================
+
 
 //====================SPECIAL COMMANDS=============================
 int GetArgPush(struct Output_buffer* output, struct Line_ptr* line);
@@ -28,8 +34,10 @@ int GetArgPop(struct Output_buffer* output, struct Line_ptr* line);
 
 const int MODE_1 = 1;
 const int MODE_2 = 2;
+
 int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok);
 //==================================================================
+
 
 //=========LABLE TABLE==============================================
 void LabelTableCtor(struct Label_table* spisok);
@@ -40,6 +48,7 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t size );
 void LabelDump(struct Label_table* spisok);
 char* SkipSpaces(char* ptr);
 //==================================================================
+
 
 //========ADDITIONAL===============
 void BinaryIntOutput(int number);
@@ -75,6 +84,7 @@ struct Output_buffer
 {
     char* buffer;
     int ip;
+    int ip_second;
 };
 
 struct File_code

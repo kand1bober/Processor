@@ -13,11 +13,14 @@
 void LabelTableCtor(struct Label_table* spisok)
 {
     spisok->labels = (Label*)calloc(LABEL_ARR_SIZE, sizeof(Label) );
+    spisok->jump_ip = (int*)calloc(LABEL_ARR_SIZE, sizeof(int) );
+    spisok->jump_count = 0;
 }
 
 
 void LabelTableDtor(struct Label_table* spisok)
 {
+    free(spisok->jump_ip);
     free(spisok->labels);
 }
 
@@ -111,39 +114,30 @@ int WriteLabel(struct Label_table* spisok, char* ptr, size_t length)
 
 int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok)
 {
-    // printf(RED "Bye bye...\n" DELETE_COLOR);
     char* buffer = line->start + strlen("Jmp"); //--> находим имя метки --> находим ей в массиве структур меток и берё её ip 
     buffer = SkipSpaces(buffer);
 
-    printf(GREEN "%s %ld\n" DELETE_COLOR, buffer, strlen(buffer) );
     Label* search = SearchLabel(spisok, buffer, strlen(buffer) );
 
     if (mode == 1)
     {
         if( search )
-        {
+        {   
             *(int*)(output->buffer + output->ip) = 0;
+
+            FillArrayOfJumps(spisok, output->ip);              // запоминаем положение jump'а
+
             output->ip += sizeof( AssemblerElem );
+            return 0;
         }
         else 
         {
             printf("No such labels\n");
-        }
-    }
-    else if ( mode == 2)
-    {
-        if( search )
-        {
-            *(int*)(output->buffer + output->ip) = search->label_ip;
-            output->ip += sizeof( AssemblerElem );
-        }
-        else 
-        {
-            printf("Jump with no arguments\n");
+            return 1;
         }
     }
 
-    return 0;
+    return -1;
 }   
 
 
@@ -173,31 +167,22 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
         return nullptr;
     }
 
-    
-
-    // for (int i = 0; i < spisok->amount; i++)
-    // {
-    //     if ( strncmp( spisok->labels[i].name, ptr, size) == 0 )
-    //     {   
-    //         printf(PURPLE "%s\n%s\n" DELETE_COLOR, spisok->labels[i].name, ptr);
-    //         return &spisok->labels[i];
-    //     }
-    //     else
-    //     {
-    //          printf(PURPLE "searching failed\n" DELETE_COLOR);
-    //         return nullptr;
-    //     }
-    // }
-
     return nullptr;
 }
 
 void LabelDump(struct Label_table* spisok)
 {
+    printf(BLUE "\nDump:\n" YELLOW);
     for (int i = 0; i < spisok->amount; i++ )
     {
         printf("%d: %s %d\n", i, spisok->labels[i].name, spisok->labels[i].label_ip );
     }
+    printf("\n");
+    for (int i = 0; i < spisok->jump_count; i++)
+    {
+        printf("%d: %d\n", i, spisok->jump_ip[i] );
+    }
+    printf(BLUE "===End of the dump===\n\n" DELETE_COLOR);
 }
 
 
@@ -209,4 +194,11 @@ char* SkipSpaces(char* ptr)
         i++;
     }
     return ptr + i;
+}
+
+
+void FillArrayOfJumps(struct Label_table* spisok, int ip)
+{
+    spisok->jump_ip[spisok->jump_count] = ip;
+    spisok->jump_count++;
 }

@@ -1,4 +1,4 @@
-#define PRINT_DEBUG
+// #define PRINT_DEBUG
 
 
 #include <string.h>
@@ -29,30 +29,35 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
     for (int i = 0; i < file_a->lines_amount; i++)
     {
         sscanf( file_a->lines_arr[i].start, "%s", command_name );
-        printf("\n");
-        printf("iteration %d:   %s\n", i, command_name );
+
+        ON_DEBUG
+        (
+            printf("\n");
+            printf(BLUE "ip before iteration: %d\n" DELETE_COLOR, output->ip); 
+            printf("iteration %d:   %s\n", i, command_name );
+        )
+
         //====Fill char array with comands and argumants===
         GetArg( command_name, &file_a->lines_arr[i], output, &spisok);
         //==================================================
-        printf("\n");
+
+        ON_DEBUG( printf(ORANGE "\nip after iteration: %d\n" DELETE_COLOR, output->ip); )
     }
-    printf("ip: %d\n", output->ip); //Check
     // ===================END OF FIRST=============================
 
 
     //===============SECOND PROCESSING=============================
-    printf("size: %d\n", spisok.jump_count);
     int value = 0;
     char* target = nullptr;
     for(int i = 0; i < spisok.jump_count; i++)
     {
         value = spisok.labels[i].label_ip;
-        target = output->buffer + spisok.jump_ip[i]; 
+        target = output->buffer + spisok.labels[i].jump_ip; 
         memcpy(target, &value, sizeof(int) );  //TODO: зависит ли от типа ?
     }
     //=================END OF SECOND===============================
 
-    LabelDump(&spisok);
+    LabelDump(&spisok); 
 
     LabelTableDtor(&spisok);
 }
@@ -139,7 +144,9 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
         if ( strcmp ( array[i].name , command_name ) == 0 )
         {
             *(char*)( output->buffer + output->ip ) = array[i].number;
-            printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
+
+            ON_DEBUG( printf("enum code: %d\n", *(char*)(output->buffer + output->ip) ); )
+
             output->ip += 1;
             // printf("command from input: %s command from array: %s number from enum: %d\n", command_name, array[i].name, array[i].number);
             status = 0;
@@ -148,12 +155,14 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
 
     if ( (status != 0) && ( search = SearchLabel(spisok, command_name, strlen(command_name) + 1) ) )
     {
-        printf("Getname: only label\n");
+        // printf("Getname: only label\n");
         search->label_ip = output->ip;
-        printf("found label: %d\n", search->label_ip);
+        // printf("found label: %d\n", search->label_ip);
         status = 2;
         *(char*)( output->buffer + output->ip ) = kJmpspace;
-        printf("enum code: %d\n", *(char*)(output->buffer + output->ip) );
+
+        ON_DEBUG( printf("enum code: %d\n", *(char*)(output->buffer + output->ip) ); ) 
+
         output->ip += 1;
 
         // printf("wrong command\n");
@@ -187,17 +196,10 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         else
             printf(RED "Warning: No closing bracket :(\n" DELETE_COLOR);
 
-        // printf("pos1: %p, ch: %c\n", buffer, *buffer);
-        // printf("pos2:  %p, ch: %c\n", buffer, *buffer);
-        // printf("string: %s\n", buffer);
-
         buffer += 2;
 
         if ( strncmp( buffer, "AX", 2 ) == 0 )  //TODO: убрать копипаст ввода, вынести часть ввода в функцию и зать не только в GetArgPush и GetArgPop ни о в GetJumpArg
         {
-            // printf(RED "Memory with regs:\n" DELETE_COLOR);
-            // printf(RED "reg AX:\n" DELETE_COLOR);
-
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
             ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
@@ -225,7 +227,6 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         }
         else 
         {
-            // printf(RED "onlu mamory:\n" DELETE_COLOR);
             ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
 
             return 0;
@@ -234,11 +235,6 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
     else
     {
         buffer = line->start + strlen("Push") + 1;
-
-        // printf("No []: \n");
-        // printf("pos:  %d\n", output->ip);
-        // printf("%s\n", output->buffer + output->ip);
-        // printf(RED "only regs :\n" DELETE_COLOR);
 
         if ( strncmp( buffer, "AX", 2 ) == 0 )
         {
@@ -275,11 +271,9 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
             buffer = line->start + strlen("Push");
             *(output->buffer + output->ip - 1) |= INPUT_MASK;
 
-            // printf("simple input\n");
-            // printf("pos:  %d\n", output->ip);
             if ( sscanf( buffer, "%d", &arg ) == 1 )
             {
-                printf("arg: %d\n", arg);
+                ON_DEBUG( printf("arg: %d\n", arg); )
                 *(int*)( output->buffer + output->ip ) = arg;
 
                 ON_DEBUG
@@ -307,7 +301,7 @@ int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)
 
     if ( sscanf( line->start + strlen("Pop"), "%d", &arg) == 1 )
     {
-        printf("arg: %d\n", arg);   
+        ON_DEBUG( printf("arg: %d\n", arg); )  
 
         *(int*)(output->buffer + output->ip) = arg;
         output->ip += sizeof(AssemblerElem);

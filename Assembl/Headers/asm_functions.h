@@ -24,7 +24,7 @@ void CountManAndArg(struct File_asm* file);
 void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output, struct Label_table* spisok);
 int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, struct Cmd_strings* array, int size);
 //=============SECOND PROCESSING===================================
-void FillArrayOfJumps(struct Label_table* spisok, int ip);
+void FillArrayOfJumps(struct Label* label, struct Label_table* spisok, int ip);
 //=================================================================
 
 
@@ -84,7 +84,6 @@ struct Output_buffer
 {
     char* buffer;
     int ip;
-    int ip_second;
 };
 
 struct File_code

@@ -1,8 +1,4 @@
-#define PRINT_DEBUG
-
-
-// #include <string.h>
-// #include <ctype.h>
+// #define PRINT_DEBUG
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
@@ -13,21 +9,19 @@
 void LabelTableCtor(struct Label_table* spisok)
 {
     spisok->labels = (Label*)calloc(LABEL_ARR_SIZE, sizeof(Label) );
-    spisok->jump_ip = (int*)calloc(LABEL_ARR_SIZE, sizeof(int) );
     spisok->jump_count = 0;
 }
 
 
 void LabelTableDtor(struct Label_table* spisok)
 {
-    free(spisok->jump_ip);
     free(spisok->labels);
 }
 
 
 void FindLabels(struct Label_table* spisok, struct File_asm* file)
 {
-    printf(GREEN "==Preprocessing labelss==\n" DELETE_COLOR);
+    ON_DEBUG( printf(GREEN "==Preprocessing labelss==\n" DELETE_COLOR); )
 
     spisok->amount = 1;
     char* ptr1 = nullptr;
@@ -35,7 +29,7 @@ void FindLabels(struct Label_table* spisok, struct File_asm* file)
 
     for (int i = 0; i < file->lines_amount; i++)
     {
-        printf("%s\n", file->lines_arr[i].start);  
+        ON_DEBUG( printf("%s\n", file->lines_arr[i].start); ) 
         //TODO: LabelParser()
         if ( ( ptr1 = strchr( file->lines_arr[i].start, ':' ) ) != nullptr ) 
         {
@@ -54,19 +48,21 @@ void FindLabels(struct Label_table* spisok, struct File_asm* file)
         }
         else 
         {
-            continue;
+            continue; 
         }
-        printf("\n");
+        ON_DEBUG( printf("\n"); )
     }
 
-    printf(PURPLE "Result:\n" );
-    printf("actual size: %d\n" DELETE_COLOR, spisok->amount);
-    for (int i = 0; i < spisok->amount - 1; i++)
-    {   
-        printf(PURPLE "%d: %s\n" DELETE_COLOR, i, spisok->labels[i].name);
-    }
-
-    printf(GREEN "==End of preprocessing labels==\n" DELETE_COLOR);
+    ON_DEBUG
+    (
+        printf(PURPLE "Result:\n" );
+        printf("actual size: %d\n" DELETE_COLOR, spisok->amount);
+        for (int i = 0; i < spisok->amount - 1; i++)
+        {   
+            printf(PURPLE "%d: %s\n" DELETE_COLOR, i, spisok->labels[i].name);
+        }
+        printf(GREEN "==End of preprocessing labels==\n" DELETE_COLOR);
+    )
 }
 
 
@@ -125,14 +121,14 @@ int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct La
         {   
             *(int*)(output->buffer + output->ip) = 0;
 
-            FillArrayOfJumps(spisok, output->ip);              // запоминаем положение jump'а
+            FillArrayOfJumps(search, spisok, output->ip);              // запоминаем положение jump'а
 
             output->ip += sizeof( AssemblerElem );
             return 0;
         }
         else 
         {
-            printf("No such labels\n");
+            ON_DEBUG( printf("No such labels\n"); )
             return 1;
         }
     }
@@ -143,8 +139,9 @@ int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct La
 
 Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
 {
-    printf("Search:\n");
+    ON_DEBUG( printf("Search labels:\n"); )
 
+    //==============FIRST PATTERN=============================
     int status = 0;
 
     for ( int i = 0; i < spisok->amount; i++ )
@@ -152,7 +149,7 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
         if ( strncmp( spisok->labels[i].name, ptr, length ) == 0 )
         {
             status = 1;
-            printf(PURPLE "Searching succes\n" DELETE_COLOR);
+            ON_DEBUG( printf(PURPLE "Searching succes\n" DELETE_COLOR); )
             return &spisok->labels[i];
         }
         else 
@@ -163,7 +160,7 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
     }
     if (!status)
     {
-        printf(PURPLE "searching failed\n" DELETE_COLOR);
+        ON_DEBUG( printf(PURPLE "searching failed\n" DELETE_COLOR); )
         return nullptr;
     }
 
@@ -172,17 +169,13 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
 
 void LabelDump(struct Label_table* spisok)
 {
-    printf(BLUE "\nDump:\n" YELLOW);
-    for (int i = 0; i < spisok->amount; i++ )
+    printf(SINIY "\nDump:\n" YELLOW);
+    printf("amount of labels: %d\n\n", spisok->jump_count);
+    for (int i = 0; i < spisok->amount - 1; i++ )
     {
-        printf("%d: %s %d\n", i, spisok->labels[i].name, spisok->labels[i].label_ip );
+        printf("%d: from %d to  %s ip = %d\n", i, spisok->labels[i].jump_ip, spisok->labels[i].name, spisok->labels[i].label_ip );
     }
-    printf("\n");
-    for (int i = 0; i < spisok->jump_count; i++)
-    {
-        printf("%d: %d\n", i, spisok->jump_ip[i] );
-    }
-    printf(BLUE "===End of the dump===\n\n" DELETE_COLOR);
+    printf(DELETE_COLOR SINIY "===End of the dump===\n\n" DELETE_COLOR);
 }
 
 
@@ -197,8 +190,8 @@ char* SkipSpaces(char* ptr)
 }
 
 
-void FillArrayOfJumps(struct Label_table* spisok, int ip)
+void FillArrayOfJumps(struct Label* label, struct Label_table* spisok, int ip)
 {
-    spisok->jump_ip[spisok->jump_count] = ip;
+    label->jump_ip = ip;
     spisok->jump_count++;
 }

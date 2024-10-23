@@ -35,7 +35,7 @@ int GetArgPop(struct Output_buffer* output, struct Line_ptr* line);
 const int MODE_1 = 1;
 const int MODE_2 = 2;
 
-int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok);
+int GetArgJump(struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok);
 //==================================================================
 
 

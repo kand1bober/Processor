@@ -1,7 +1,7 @@
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_library.h"
 
-void InputFileCode(struct File_proc* file)
+void InputFileCode(struct File_proc* file, struct SPU* proc)
 {
     printf("type number of file with programm\n");
     unsigned file_number = 0;
@@ -61,7 +61,7 @@ void InputFileCode(struct File_proc* file)
     // fseek(input_file, sizeof(char) * 16L,  SEEK_SET);
     printf("Position: %ld\n", ftell(input_file) );
 
-    fread( file->buffer, sizeof(char), file->head.size_of_code, input_file); assert(fread);
+    fread( proc->code, sizeof(char), file->head.size_of_code, input_file); assert(fread);
     fclose(input_file);
    //====================================================
 }

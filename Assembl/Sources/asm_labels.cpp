@@ -1,4 +1,4 @@
-// #define PRINT_DEBUG
+#define PRINT_DEBUG
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
@@ -108,18 +108,16 @@ int WriteLabel(struct Label_table* spisok, char* ptr, size_t length)
     return -2; // kakoyto pizdec
 }
 
-int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok)
+int GetArgJump(struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok)
 {
     char* buffer = line->start + strlen("Jmp"); //--> находим имя метки --> находим ей в массиве структур меток и берё её ip 
     buffer = SkipSpaces(buffer);
 
     Label* search = SearchLabel(spisok, buffer, strlen(buffer) );
 
-    if (mode == 1)
-    {
         if( search )
         {   
-            *(int*)(output->buffer + output->ip) = 0;
+            *(double*)(output->buffer + output->ip) = 0;
 
             FillArrayOfJumps(search, spisok, output->ip);              // запоминаем положение jump'а
 
@@ -131,7 +129,6 @@ int GetArgJump(int mode, struct Output_buffer* output, Line_ptr* line, struct La
             ON_DEBUG( printf("No such labels\n"); )
             return 1;
         }
-    }
 
     return -1;
 }   
@@ -169,7 +166,7 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
 
 void LabelDump(struct Label_table* spisok)
 {
-    printf(SINIY "\nDump:\n" YELLOW);
+    printf(SINIY "\nDump of labels:\n" YELLOW);
     printf("amount of labels: %d\n\n", spisok->jump_count);
     for (int i = 0; i < spisok->amount - 1; i++ )
     {

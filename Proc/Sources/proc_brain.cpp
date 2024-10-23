@@ -2,66 +2,44 @@
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_macros.h"
 
-void Run(char* command_line, size_t size_of_code)
+void Run(  struct SPU* flow_copy )
 {   
     printf("Run processor:\n\n");
 
-    struct SPU flow = {};
-    
-    STACK_CTOR_CALL(&flow.stack, START_CAPACITY);
-
-    flow.IP = 0;
+    struct SPU* flow = flow_copy;
     while(1)
     {
-        char command = *(command_line + flow.IP);
-        if ( (size_t)flow.IP < size_of_code)
+        char command = *(flow->code + flow->IP);
+
+        char first_five_bits = ( command  & ~(1 << 5) );
+
+        if ( (size_t)flow->IP < flow->size_of_code)
         {
-            printf("IP: %d\n", flow.IP);
+            printf("IP: %d\n", flow->IP);
 
-            switch(command)
-            {
-                // case kPush:
-                // {
-                //     // printf("Push\n");
-                //     ProcElem arg = 0;
-                    
-                //     flow.IP += 1;
-                //     arg = *(command_line + flow.IP);
-                //     flow.IP += 1;
+            switch( first_five_bits )
+            {   
+                case kPush:
+                {
+                    ON_DEBUG_PROC( printf("Push\n"); )
 
-                //     STACK_PUSH_CALL(&flow.stack, arg);
-                //     PAUSE;
-                //     continue;
-                // }
+                    ProcElem arg = GetArgPush( command, flow );
 
-                // case kPushR:
-                // {
-                //     flow.IP++;
-                //     if( *(command_line + flow.IP) == AX )
-                //     {
-                //         flow.AX = STACK_POP_CALL(&flow.stack);
-                //         flow.IP++;
-                //     }
+                    STACK_PUSH_CALL( &flow->stack, arg );
 
-                //     else if( *(command_line + flow.IP) == BX )
-                //     {
-                //         flow.BX = STACK_POP_CALL(&flow.stack);
-                //         flow.IP++;
-                //     }
-                //     else if( *(command_line + flow.IP) == CX )
-                //     {
-                //         flow.CX = STACK_POP_CALL(&flow.stack);
-                //         flow.IP++;
-                //     }
-                // }
+                    continue;
+                }
 
                 // case kPop:
                 // {
-                
+                //     ON_DEBUG_PROC( printf("Pop\n"); )
+
+                //     ProcElem Arg = 0;
+
+                    
                 // }
 
-
-
+                
 
 
 
@@ -194,16 +172,12 @@ void Run(char* command_line, size_t size_of_code)
 
 
 
-
-
-
-
                 case kOut:
                 {
                     // printf("Out\n");
                     ProcElem arg = 0;
-                    flow.IP += 1;
-                    arg = STACK_POP_CALL(&flow.stack);
+                    flow->IP += 1;
+                    arg = STACK_POP_CALL(&flow->stack);
                     printf("%d\n", arg);
                     PAUSE;
                     continue;
@@ -214,7 +188,7 @@ void Run(char* command_line, size_t size_of_code)
                     // printf("In\n");
                     ProcElem arg = 0;
                     scanf("%d", &arg);
-                    STACK_PUSH_CALL(&flow.stack, arg);
+                    STACK_PUSH_CALL(&flow->stack, arg);
                     PAUSE;
                     continue;
                 }
@@ -222,11 +196,11 @@ void Run(char* command_line, size_t size_of_code)
                 case kAdd:
                 {
                     // printf("Add\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
-                    ProcElem b = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
+                    ProcElem b = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, a + b);
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, a + b);
                     PAUSE;
                     continue;
                 }
@@ -234,11 +208,11 @@ void Run(char* command_line, size_t size_of_code)
                 case kSub:
                 {
                     // printf("Sub\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
-                    ProcElem b = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
+                    ProcElem b = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, (b - a) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, (b - a) );
 
                     PAUSE;
                     continue;
@@ -247,11 +221,11 @@ void Run(char* command_line, size_t size_of_code)
                 case kMul:
                 {
                     // printf("Mul\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
-                    ProcElem b = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
+                    ProcElem b = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, (a * b) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, (a * b) );
 
                     PAUSE;
                     continue;
@@ -260,11 +234,11 @@ void Run(char* command_line, size_t size_of_code)
                 case kDiv:
                 {
                     // printf("Div\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
-                    ProcElem b = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
+                    ProcElem b = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, (b / a) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, (b / a) );
 
                     PAUSE;
                     continue;
@@ -274,10 +248,10 @@ void Run(char* command_line, size_t size_of_code)
                 {
                     // printf("Sin\n");
                     //delete, when make on double
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
                 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, sin( (double)a ) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, sin( (double)a ) );
 
                     continue;
                 }
@@ -285,10 +259,10 @@ void Run(char* command_line, size_t size_of_code)
                 case kCos:
                 {
                     // printf("Cos\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, cos( (double)a ) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, cos( (double)a ) );
                     
                     PAUSE;
                     continue;
@@ -297,10 +271,10 @@ void Run(char* command_line, size_t size_of_code)
                 case kRoot:
                 {
                     // printf("Root\n");
-                    ProcElem a = STACK_POP_CALL(&flow.stack);
+                    ProcElem a = STACK_POP_CALL(&flow->stack);
 
-                    flow.IP += 1;
-                    STACK_PUSH_CALL(&flow.stack, sqrt( (double)a ) );
+                    flow->IP += 1;
+                    STACK_PUSH_CALL(&flow->stack, sqrt( (double)a ) );
 
                     PAUSE;
                     continue;
@@ -313,7 +287,7 @@ void Run(char* command_line, size_t size_of_code)
                         StackDump(&flow.stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
                     #endif
 
-                    flow.IP += 1;
+                    flow->IP += 1;
                     PAUSE;
                     continue;
                 }
@@ -321,7 +295,7 @@ void Run(char* command_line, size_t size_of_code)
                 case kHlt:
                 {
                     printf("Hlt\n");
-                    STACK_DTOR_CALL(&flow.stack);
+                    STACK_DTOR_CALL(&flow->stack);
                     printf("Processor stopped\n");
                     PAUSE;
                     break;
@@ -333,7 +307,7 @@ void Run(char* command_line, size_t size_of_code)
                 {
                     printf("huuuuuy\n");
 
-                    flow.IP += 1;
+                    flow->IP += 1;
                     PAUSE;
                     continue;
                 }
@@ -342,7 +316,7 @@ void Run(char* command_line, size_t size_of_code)
                 {
                     printf("SNTXERR: %d\n", command);
 
-                    flow.IP += 1;
+                    flow->IP += 1;
                     PAUSE;
                     continue;
                 }

@@ -1,4 +1,4 @@
-// #define PRINT_DEBUG
+#define PRINT_DEBUG
 
 
 #include <string.h>
@@ -47,13 +47,13 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 
 
     //===============SECOND PROCESSING=============================
-    int value = 0;
+    AssemblerElem value = 0;
     char* target = nullptr;
     for(int i = 0; i < spisok.jump_count; i++)
     {
         value = spisok.labels[i].label_ip;
         target = output->buffer + spisok.labels[i].jump_ip; 
-        memcpy(target, &value, sizeof(int) );  //TODO: зависит ли от типа ?
+        memcpy(target, &value, sizeof(AssemblerElem) );  //TODO: зависит ли от типа ?
     }
     //=================END OF SECOND===============================
 
@@ -118,7 +118,7 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
                 ( command_code == kJe ) || ( command_code == kJne ) || 
                 ( command_code == kJmp)) 
         {
-            GetArgJump(MODE_1, output, line, spisok);
+            GetArgJump(output, line, spisok);
         }
         else 
         {
@@ -194,7 +194,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         if ( strchr( buffer, ']' ) != nullptr )
             ;
         else
-            printf(RED "Warning: No closing bracket :(\n" DELETE_COLOR);
+            printf(ORANGE "Warning: No closing bracket :(\n\n" DELETE_COLOR);
 
         buffer += 2;
 
@@ -202,7 +202,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kAX;
             return 0;
@@ -211,7 +211,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kBX;
             return 0;
@@ -220,14 +220,14 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
 
             *( output->buffer + (output->ip++) ) = kCX;
             return 0;
         }
         else 
         {
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
 
             return 0;
         }
@@ -242,7 +242,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
 
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kAX;
             return 0;
@@ -251,7 +251,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kBX;
             return 0;
@@ -260,7 +260,7 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
         {
             *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
 
-            ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
 
             *( output->buffer + (output->ip++) ) = kCX;
             return 0;
@@ -271,16 +271,16 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
             buffer = line->start + strlen("Push");
             *(output->buffer + output->ip - 1) |= INPUT_MASK;
 
-            if ( sscanf( buffer, "%d", &arg ) == 1 )
+            if ( sscanf( buffer, "%lf", &arg ) == 1 ) //TODO: как сделать %d %lf в зависимости от AssemblerElem
             {
-                ON_DEBUG( printf("arg: %d\n", arg); )
-                *(int*)( output->buffer + output->ip ) = arg;
+                ON_DEBUG( printf("arg: %lf\n", arg); )
+                *(double*)( output->buffer + output->ip ) = arg;
 
                 ON_DEBUG
                 (
-                    BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
+                    // BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
                     printf(" ");
-                    BinaryIntOutput( *(int*)( output->buffer + output->ip ) );
+                    // BinaryIntOutput( *(double*)( output->buffer + output->ip ) );
                 )
 
                 output->ip += sizeof( AssemblerElem );
@@ -295,15 +295,15 @@ int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
 }
 
 
-int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)
+int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)  //TODO: сделать также как POP
 {
-    int arg = 0;
+    double arg = 0;
 
-    if ( sscanf( line->start + strlen("Pop"), "%d", &arg) == 1 )
+    if ( sscanf( line->start + strlen("Pop"), "%lf", &arg) == 1 )
     {
-        ON_DEBUG( printf("arg: %d\n", arg); )  
+        ON_DEBUG( printf("arg: %lf\n", arg); )  
 
-        *(int*)(output->buffer + output->ip) = arg;
+        *(double*)(output->buffer + output->ip) = arg;
         output->ip += sizeof(AssemblerElem);
 
         return 0;

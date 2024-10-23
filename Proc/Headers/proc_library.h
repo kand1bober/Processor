@@ -1,14 +1,12 @@
 #include <stdint.h>
 
-#include "MyStackLib.h"
-
 #ifndef PROC_LIBRARY_HEADER
 #define PROC_LIBRARY_HEADER
 
 const uint32_t SIGNATURE = 0x56564b;
 const uint32_t VERSION = 2;
 
-typedef int ProcElem;
+typedef double ProcElem;
 
 enum commands
 {
@@ -40,16 +38,6 @@ enum commands
     kJne = 23,
     kJmp = 24,
     kJmpspace = 25,
-};
-
-struct SPU
-{
-    Stack_t stack;
-
-    int16_t AX;
-    int16_t BX;
-    int16_t CX;
-    int16_t IP;
 };
 
 #endif

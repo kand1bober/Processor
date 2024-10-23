@@ -6,7 +6,7 @@
 
 #include "proc_library.h"
 
-// #include "MyStackLib.h"
+#include "MyStackLib.h"
 
 #ifndef PROC_FUNCTIONS_HEADER
 #define PROC_FUNCTIONS_HEADER
@@ -32,8 +32,25 @@ struct Line_ptr
     int length;
 };
 
-void Run(char* command_line, size_t size);
-void InputFileCode(struct File_proc* file);
-void BinaryOutput(int number);
+struct SPU
+{
+    Stack_t stack;
+
+    char* code;
+    int size_of_code;
+
+    int16_t AX;
+    int16_t BX;
+    int16_t CX;
+    int16_t IP;
+};
+
+
+void Run( struct SPU* flow_copy );
+void InputFileCode( struct File_proc* file );
+void BinaryIntOutput( int number );
+void BinaryCharOutput( char number );
+int GetArgPush( char command, struct SPU* proc );
+int GetArgPop( char command, struct SPU* proc );
 
 #endif

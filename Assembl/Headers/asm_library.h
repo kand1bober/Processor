@@ -10,7 +10,7 @@ const int LABEL_ARR_SIZE = 20;
 const uint32_t SIGNATURE = 0x56564b;
 const uint32_t VERSION = 3;
 
-typedef int AssemblerElem;
+typedef double AssemblerElem;
 
 enum Commands
 {

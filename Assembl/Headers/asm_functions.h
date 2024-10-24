@@ -52,7 +52,7 @@ char* SkipSpaces(char* ptr);
 
 //========ADDITIONAL===============
 void BinaryIntOutput(int number);
-void BinaryCharOutput(char number);
+void BinaryCharOutput(unsigned char number);
 //=================================
 
 struct Line_ptr

@@ -1,6 +1,7 @@
 
 CC = g++
-CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
+# CFLAGS = -fsanitize=address,undefined -D _DEBUG -O0 -Wall -Wextra
+CFLAGS = -D _DEBUG -O0 -Wall -Wextra
 
 # BUILD_DIR = build
 SOURCES_DIR_PROC = Proc/Sources

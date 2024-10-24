@@ -24,8 +24,16 @@ void InputFileCode(struct File_proc* file, struct SPU* proc)
             break;  
         }
 
+        case 3:
+        {
+            printf("PROGRAMM_ASM_3.txt\n");
+            strcpy(file->name, "PROGRAMM_CODE_3.txt"); 
+            break;  
+        }
+
         default:
         {       
+
             break;
         }
     }
@@ -45,10 +53,11 @@ void InputFileCode(struct File_proc* file, struct SPU* proc)
     stat(filepath, &file_info);
 
     unsigned long int size_of_stream = (unsigned long int)file_info.st_size;
+    // file->head.size_of_code = size_of_stream;/
 
     ON_DEBUG( printf("size of file: %lu\n", size_of_stream); )
 
-    //=========REAADING_HEADER=====================
+    //=========READING_HEADER=====================
     fseek(input_file, sizeof(char) * 0L,  SEEK_SET);
     fread(&file->head, sizeof(file->head), 1, input_file);
 
@@ -61,7 +70,7 @@ void InputFileCode(struct File_proc* file, struct SPU* proc)
     // fseek(input_file, sizeof(char) * 16L,  SEEK_SET);
     printf("Position: %ld\n", ftell(input_file) );
 
-    fread( proc->code, sizeof(char), file->head.size_of_code, input_file); assert(fread);
+    fread( file->buffer, sizeof(char), file->head.size_of_code, input_file ); assert(fread);
     fclose(input_file);
    //====================================================
 }

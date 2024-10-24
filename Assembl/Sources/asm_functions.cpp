@@ -1,4 +1,4 @@
-#define PRINT_DEBUG
+// #define PRINT_DEBUG
 
 
 #include <string.h>
@@ -85,7 +85,6 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         {"AX", kAX},
         {"BX", kBX},
         {"CX", kCX},
-        {"IP", kIP},
         
         {"ja", kJa},
         {"jae", kJae},
@@ -152,6 +151,7 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
             status = 0;
         }
     }
+    //TODO: сделать поиск по двум массивам. Регистров и комманд
 
     if ( (status != 0) && ( search = SearchLabel(spisok, command_name, strlen(command_name) + 1) ) )
     {
@@ -338,7 +338,7 @@ void OutputFile(struct File_code* file)
 }
 
 
-void BinaryCharOutput(char number)
+void BinaryCharOutput(unsigned char number)
 {
     int l = 8 *  sizeof(number);
     for (int i = l - 1; i >= 0; i--)

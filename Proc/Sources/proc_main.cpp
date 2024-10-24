@@ -3,27 +3,45 @@
 
 int main()
 {
+    //=====OPEN FILE AND CREATE PROCESSOR====
     struct File_proc file = {};
+    struct SPU proc = {};
+    STACK_CTOR_CALL(&proc.stack, START_CAPACITY);
+    InputFileCode(&file, &proc);
+    //=======================================
 
-    InputFileCode(&file);
-
-    for(int i = 0; i < file.head.size_of_code; i++)
-    {
-        printf("%10d\n", *(file.buffer + i) );
-    }
-    printf("\n");
-
-    //========CREATING PROCESSOR==============
-    struct SPU flow = {};
-    STACK_CTOR_CALL(&flow.stack, START_CAPACITY);
-    flow.code = file.buffer;
-    flow.size_of_code = file.head.size_of_code;
-    flow.IP = 0;
+    //=======FILLING STRUCTURE OF PROC========
+    proc.code = file.buffer;
+    proc.size_of_code = file.head.size_of_code;
+    proc.IP = 0;
+    
+    double* regs_buffer = (double*)calloc( 3, sizeof(double) );
+    proc.regs = regs_buffer;
     //========================================
 
-    Run( &flow );
 
-    free(file.buffer);
+    //============CHECK===========================
+    for( uint32_t i = 0; i < proc.size_of_code; i++)
+    {
+        printf("%10u\n", *(unsigned char*)(proc.code + i) );
+    }
+    printf("\n");
+    //============================================
+
+    // unsigned char test = 126;
+    // BinaryCharOutput(test);
+
+    // char test_1 = ( test & ( ~(255 << 5) ) );
+
+    // // BinaryCharOutput( 123 );
+    // BinaryCharOutput( test_1 );
+
+
+    Run( &proc );
+
+
+    free( proc.code );
+    free( proc.regs );
 
     return 0;   
 }

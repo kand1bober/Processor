@@ -8,6 +8,7 @@
 
 #include "MyStackLib.h"
 
+
 #ifndef PROC_FUNCTIONS_HEADER
 #define PROC_FUNCTIONS_HEADER
 
@@ -37,20 +38,24 @@ struct SPU
     Stack_t stack;
 
     char* code;
-    int size_of_code;
+    uint64_t size_of_code;
 
-    int16_t AX;
-    int16_t BX;
-    int16_t CX;
-    int16_t IP;
+    double* regs;
+
+    uint64_t IP;
 };
 
 
 void Run( struct SPU* flow_copy );
-void InputFileCode( struct File_proc* file );
+void InputFileCode( struct File_proc* file, struct SPU* proc );
 void BinaryIntOutput( int number );
-void BinaryCharOutput( char number );
-int GetArgPush( char command, struct SPU* proc );
-int GetArgPop( char command, struct SPU* proc );
+void BinaryCharOutput( unsigned char number );
+ProcElem GetArgPush( char command, struct SPU* proc );
+ProcElem GetArgPop( char command, struct SPU* proc );
+void DoJump( char command, struct SPU* proc );
+
+const unsigned char MEMORY_MASK = 128;
+const unsigned char REGISTER_MASK = 64;
+const unsigned char INPUT_MASK = 32;
 
 #endif

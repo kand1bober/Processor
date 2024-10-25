@@ -33,16 +33,26 @@ struct Line_ptr
     int length;
 };
 
+struct RAM 
+{
+    ProcElem* ram;
+    uint64_t IP;
+    bool access;
+};
+
 struct SPU
 {
+    uint64_t size_of_code;
+
+    uint64_t IP;
+
     Stack_t stack;
 
     char* code;
-    uint64_t size_of_code;
 
-    double* regs;
-
-    uint64_t IP;
+    ProcElem* regs;
+    
+    RAM memory;
 };
 
 
@@ -57,5 +67,7 @@ void DoJump( char command, struct SPU* proc );
 const unsigned char MEMORY_MASK = 128;
 const unsigned char REGISTER_MASK = 64;
 const unsigned char INPUT_MASK = 32;
+
+const int MEMORY_START_SIZE = 100;
 
 #endif

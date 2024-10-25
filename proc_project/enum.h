@@ -29,6 +29,9 @@ enum Commands
     kJne = 22,
     kJmp = 23,
     kJmpspace = 24,
+
+    kCall = 25,
+    kRet = 26,
 };
 
 #endif

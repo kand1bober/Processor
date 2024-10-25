@@ -8,7 +8,6 @@ int main()
     struct SPU proc = {};
     STACK_CTOR_CALL(&proc.stack, START_CAPACITY);
     InputFileCode(&file, &proc);
-    //=======================================
 
     //=======FILLING STRUCTURE OF PROC========
     proc.code = file.buffer;
@@ -17,6 +16,11 @@ int main()
     
     double* regs_buffer = (double*)calloc( 3, sizeof(double) );
     proc.regs = regs_buffer;
+
+    //==============MEMORY====================
+    proc.memory.ram = (ProcElem*)calloc( MEMORY_START_SIZE, sizeof(ProcElem) );
+    proc.memory.IP = 0;
+    proc.memory.access = true;
     //========================================
 
 
@@ -39,7 +43,7 @@ int main()
 
     Run( &proc );
 
-
+    free( proc.memory.ram );
     free( proc.code );
     free( proc.regs );
 

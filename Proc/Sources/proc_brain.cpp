@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_macros.h"
@@ -33,12 +35,12 @@ void Run(  struct SPU* proc_copy )
             {   
                 case kPush:
                 {
-                    ON_DEBUG_PROC( printf("Push\n"); )
+                    PRINT_PROCESS( printf("Push\n"); )
 
                     proc->IP += 1;
                     ProcElem arg = GetArgPush( command, proc ); //Takes all arguments of this command, one or two
 
-                    ON_DEBUG_PROC( printf("arg: %lf\n", arg); )
+                    PRINT_PROCESS( printf("arg: %lf\n", arg); )
 
                     STACK_PUSH_CALL( &proc->stack, arg );
 
@@ -47,7 +49,7 @@ void Run(  struct SPU* proc_copy )
 
                 // case kPop:
                 // {
-                //     ON_DEBUG_PROC( printf("Pop\n"); )
+                //     PRINT_PROCESS( printf("Pop\n"); )
 
                 //     proc->IP += 1;
                 //     ProcElem arg = 0;
@@ -61,7 +63,7 @@ void Run(  struct SPU* proc_copy )
                     continue;
                 }
                 case kJa:
-                {
+                {        
                     DoJump( command, proc );
                     continue;
                 }
@@ -95,11 +97,17 @@ void Run(  struct SPU* proc_copy )
                     DoJump( command, proc );
                     continue;
                 }
+
+                case kCall:
+                {
+                    
+                    continue;
+                }
                 //====END OF JUMP PROCESSING=========
 
                 case kOut:
                 {
-                    // printf("Out\n");
+                    PRINT_PROCESS( printf("Out\n"); )
                     ProcElem arg = 0;
                     proc->IP += 1;
                     arg = STACK_POP_CALL(&proc->stack);
@@ -110,7 +118,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kIn:
                 {
-                    // printf("In\n");
+                    PRINT_PROCESS( printf("In\n"); )
                     ProcElem arg = 0;
                     scanf("%lf", &arg);
                     STACK_PUSH_CALL(&proc->stack, arg);
@@ -120,7 +128,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kAdd:
                 {
-                    // printf("Add\n");
+                    PRINT_PROCESS( printf("Add\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
@@ -132,7 +140,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kSub:
                 {
-                    // printf("Sub\n");
+                    PRINT_PROCESS( printf("Sub\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
@@ -145,7 +153,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kMul:
                 {
-                    // printf("Mul\n");
+                    PRINT_PROCESS( printf("Mul\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
@@ -158,7 +166,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kDiv:
                 {
-                    // printf("Div\n");
+                    PRINT_PROCESS( printf("Div\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
@@ -171,8 +179,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kSin:
                 {
-                    // printf("Sin\n");
-                    //delete, when make on double
+                    PRINT_PROCESS( printf("Sin\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                 
                     proc->IP += 1;
@@ -183,7 +190,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kCos:
                 {
-                    // printf("Cos\n");
+                    PRINT_PROCESS( printf("Cos\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
 
                     proc->IP += 1;
@@ -195,7 +202,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kRoot:
                 {
-                    // printf("Root\n");
+                    PRINT_PROCESS( printf("Root\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
 
                     proc->IP += 1;
@@ -207,7 +214,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kDump:
                 {
-                    // printf("Dump\n");
+                    PRINT_PROCESS( printf("Dump\n"); )
                     #ifdef DEBUG_STACK_FUNCS
                         StackDump( &proc->stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
                     #endif
@@ -219,7 +226,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kHlt:
                 {
-                    printf("Hlt\n");
+                    PRINT_PROCESS( printf("Hlt\n"); )
                     STACK_DTOR_CALL(&proc->stack);
                     printf("Processor stopped\n");
                     PAUSE;

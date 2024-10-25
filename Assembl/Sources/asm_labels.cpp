@@ -1,4 +1,4 @@
-// #define PRINT_DEBUG
+#define PRINT_DEBUG
 
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
@@ -163,6 +163,9 @@ Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t length )
 
     return nullptr;
 }
+
+
+
 
 void LabelDump(struct Label_table* spisok)
 {

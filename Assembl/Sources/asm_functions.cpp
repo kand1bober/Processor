@@ -1,4 +1,4 @@
-// #define PRINT_DEBUG
+#define PRINT_DEBUG
 
 
 #include <string.h>
@@ -94,6 +94,9 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         {"jne", kJne},
         {"jmp", kJmp},
         {"jmpspace", kJmpspace},
+
+        {"call", kCall},
+        {"ret", kRet},
     };
     
     int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
@@ -106,7 +109,13 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 
         if ( command_code == kPush)
         {
-            GetArgPush(output, line);
+            BinaryCharOutput( *(char*)(output->buffer + output->ip - 1) );
+            ON_DEBUG
+            ( 
+                printf("\n");
+                GetArgPush(output, line);
+                printf("\n");
+            )
         }
         else if ( command_code == kPop )
         {
@@ -180,119 +189,239 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
 }
 
 
-int GetArgPush(struct Output_buffer* output, struct Line_ptr* line)
+int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
 {
-    AssemblerElem arg = 0;
+    // char* in_buf = input->start;
 
-    char* buffer = line->start + strlen("Push") + 1;
-    
+    ON_DEBUG( char* instruction = (char*)(output->buffer + output->ip - 1); )
 
-    if ( ( buffer = strchr( buffer, '[' ) ) != nullptr)
+    input->start = SkipSpaces( input->start );
+    input->start += strlen("push");
+    input->start = SkipSpaces( input->start );
+
+    if ( strchr( input->start, '[' ) != nullptr )
     {
+        printf("Push to memory\n");
+        //===============================================================
+        if ( strchr( input->start, ']' ) != nullptr )
+        {
+            ;
+        }   
+        else 
+        {
+            printf(RED "WARNING: no closing bracket ']' \n" DELETE_COLOR);
+        }
+        //================================================================
+
         *(output->buffer + output->ip - 1) |= MEMORY_MASK;
 
-        if ( strchr( buffer, ']' ) != nullptr )
-            ;
-        else
-            printf(ORANGE "Warning: No closing bracket :(\n\n" DELETE_COLOR);
+        input->start += 1;
 
-        buffer += 2;
+        int kolvo_arg = GetArgNum( input );
 
-        if ( strncmp( buffer, "AX", 2 ) == 0 )  //TODO: убрать копипаст ввода, вынести часть ввода в функцию и зать не только в GetArgPush и GetArgPop ни о в GetJumpArg
+        if( kolvo_arg == 2 ) 
         {
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            // printf("before register: %s\n", input->start);
 
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
+            GetRegister( output, input, instruction );
+            output->ip += 1;
 
-            *( output->buffer + (output->ip++) ) = kAX;
-            return 0;
+            SkipOp( input );
+
+            GetValue( output, input, instruction );
+            output->ip += sizeof(AssemblerElem);
         }
-        else if ( strncmp( buffer, "BX", 2 ) == 0 )
+        else if ( kolvo_arg == 3 )
         {
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
-
-            *( output->buffer + (output->ip++) ) = kBX;
-            return 0;
+            GetRegister( output, input, instruction );
+            output->ip += 1;
         }
-        else if( strncmp( buffer, "CX", 2 ) == 0 )
+        else if ( kolvo_arg == 4)
         {
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
+            GetValue( output, input, instruction );
+            output->ip += sizeof(AssemblerElem);
+        }
 
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
+        printf("\n");
+        BinaryCharOutput( *instruction );
+        printf("\n");
+    }
+    else 
+    {
+        int kolvo_arg = GetArgNum( input );
 
-            *( output->buffer + (output->ip++) ) = kCX;
-            return 0;
+        // printf(RED "kod argumenta without[ ]: %d" DELETE_COLOR, kolvo_arg);
+
+        if( kolvo_arg == 2 ) 
+        {
+            printf(RED "warning: too many arguments for push" DELETE_COLOR);
+        }
+        else if ( kolvo_arg == 3 )
+        {
+            GetRegister( output, input, instruction );
+            output->ip += 1;
+        }
+        else if ( kolvo_arg == 4)
+        {
+            // printf(ORANGE "\nbefore writing value:\n" DELETE_COLOR);
+            // BinaryCharOutput( *instruction );
+            // printf("\n");
+
+            GetValue( output, input, instruction );
+            output->ip += sizeof(AssemblerElem);
+        }
+
+        printf("\n");
+        BinaryCharOutput( *instruction );
+        printf("\n");
+    }
+    
+    return 0;
+}
+
+
+int GetArgNum( struct Line_ptr* input )
+{
+    input->start = SkipSpaces( input->start );
+    printf(RED "string in GetArgNum:\n%s\n" DELETE_COLOR , input->start);
+
+    char trash[2] = {};
+    AssemblerElem value = 0;
+
+    if ( strchr(input->start, '+' ) != nullptr )               
+    {
+        ON_DEBUG( printf(SINIY "Two arguments\n" DELETE_COLOR); )
+        return 2;
+    }
+    else if( sscanf(input->start, "%lf", &value) == 1 )  
+    {
+        ON_DEBUG( printf(SINIY "Only value argument\n" DELETE_COLOR); )
+        return 4;
+    }
+    else if ( sscanf(input->start, "%2c", trash) == 1)
+    {
+        if ( (strcmp( trash, "AX") == 0 ) || ( strcmp( trash, "BX") == 0 ) || ( strcmp( trash, "CX") == 0 ) )
+        {
+            ON_DEBUG( printf(SINIY "Only register argument\n" DELETE_COLOR); )
+            return 3;
         }
         else 
         {
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); ) 
-
-            return 0;
+            printf("wrong register\n");
         }
+    }
+    
+
+    return -1;
+}
+
+
+void SkipOp( struct Line_ptr* input )
+{
+    char* operation = 0;
+
+    input->start = SkipSpaces( input->start );
+
+    // printf("\nin SkipOp: %s\n", in_buf);
+
+    if ( ( operation = strchr(input->start, '+') ) != nullptr)   
+    {
+        input->start = operation + 1;
+        input->start = SkipSpaces( input->start );
     }
     else
     {
-        buffer = line->start + strlen("Push") + 1;
+        printf(RED "warning: no operand between values\n" DELETE_COLOR);
+    }
+}
 
-        if ( strncmp( buffer, "AX", 2 ) == 0 )
+
+int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* instruction ) 
+{
+    char reg = 0;
+
+    input->start = SkipSpaces( input->start );
+
+    char first_letter = 0, second_letter = 0;
+
+    // printf("\nin GetRegister: %s\n", in_buf);
+
+    if ( sscanf(input->start, "%c", &first_letter ) == 1 )
+    {
+        if ( (first_letter == 'A') || (first_letter == 'B') || (first_letter == 'C') )
         {
-            // printf(RED "reg AX:" DELETE_COLOR);
+            input->start += 1;
 
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
-
-            *( output->buffer + (output->ip++) ) = kAX;
-            return 0;
-        }
-        else if ( strncmp( buffer, "BX", 2 ) == 0 )
-        {
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
-
-            *( output->buffer + (output->ip++) ) = kBX;
-            return 0;
-        }
-        else if( strncmp( buffer, "CX", 2 ) == 0 )
-        {
-            *( output->buffer + output->ip - 1 ) |= REGISTER_MASK;
-
-            // ON_DEBUG( BinaryCharOutput(*(output->buffer + output->ip - 1 ) ); )
-
-            *( output->buffer + (output->ip++) ) = kCX;
-            return 0;
-        }
-        else 
-        {
-
-            buffer = line->start + strlen("Push");
-            *(output->buffer + output->ip - 1) |= INPUT_MASK;
-
-            if ( sscanf( buffer, "%lf", &arg ) == 1 ) //TODO: как сделать %d %lf в зависимости от AssemblerElem
+            if ( sscanf(input->start, "%c", &second_letter ) == 1 )
             {
-                ON_DEBUG( printf("arg: %lf\n", arg); )
-                *(double*)( output->buffer + output->ip ) = arg;
-
-                ON_DEBUG
-                (
-                    // BinaryCharOutput( *( output->buffer + output->ip - 1 ) );
-                    printf(" ");
-                    // BinaryIntOutput( *(double*)( output->buffer + output->ip ) );
-                )
-
-                output->ip += sizeof( AssemblerElem );
+                input->start += 1;
             }
             else 
             {
+                ON_DEBUG( printf(RED "wrong syntax of second letter\n" DELETE_COLOR); )
                 return -1;
             }
         }
-    } 
-    return -2; // kakoyto pizdec
+    }
+    else 
+    {
+        ON_DEBUG( printf(RED "wrong syntax of first letter\n" DELETE_COLOR); )
+        return -1;
+    }
+
+    *instruction |= REGISTER_MASK;
+
+    switch (first_letter)
+    {
+        case 'A':
+        {
+            *(char*)( output->buffer + output->ip ) = kAX; 
+            break;
+        }
+        case 'B':
+        {
+            *(char*)( output->buffer + output->ip ) = kBX;
+            break;
+        }
+        case 'C':
+        {
+            *(char*)( output->buffer + output->ip ) = kCX;
+            break;
+        }
+    }
+    return reg;
 }
+
+
+int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instruction )
+{
+    AssemblerElem arg = 0;
+
+    input->start = SkipSpaces( input->start );
+    if ( sscanf(input->start, "%lf", &arg) == 1 )
+    {
+        *(AssemblerElem*)(output->buffer + output->ip ) = arg;
+
+        *instruction |= INPUT_MASK; //TODO:
+
+        printf("\n");
+        // BinaryCharOutput( *(char*)(output->buffer + output->ip - 1) );
+        printf("\n");
+    }
+    else 
+    {
+        printf(RED "wrong value argument\n" DELETE_COLOR);
+    }
+
+    return arg; 
+}
+
+//================================================================================
+
+
+
+
+
 
 
 int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)  //TODO: сделать также как POP

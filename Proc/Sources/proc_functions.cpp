@@ -47,7 +47,8 @@ ProcElem GetArgPush( char command, struct SPU* proc )
     else if ( mode & REGISTER_MASK )
     {
         ON_DEBUG_PROC( printf("register input\n"); )
-        arg = proc->regs[ (unsigned int)(*(char*)(proc->code + proc->IP)) ]; //TODO: здесь будет сложнее
+        arg = proc->regs[ (unsigned int)(*(char*)(proc->code + proc->IP - kAX)) ]; //TODO: здесь будет сложнее
+        proc->regs[ (unsigned int)(*(char*)(proc->code + proc->IP - kAX)) ] = 0;
         proc->IP += 1;
     }
     // else if ( mode & MEMORY_MASK )
@@ -67,6 +68,8 @@ ProcElem GetArgPush( char command, struct SPU* proc )
     return arg;
 }
 
+
+//===================INPUT FUNCTIONS========================
 
 ProcElem GetArgPop( char command, struct SPU* proc )
 {
@@ -194,4 +197,15 @@ void DoJump( char command, struct SPU* proc)
         }
     }
 }
+//=============================================================================================
 
+
+//================================= MEMORY FUNCTIONS ==========================================
+
+void RamDump( struct Ram* memory)
+{
+    printf(RED "Memory Demp\n" DELETE_COLOR);
+    
+}
+
+//=============================================================================================

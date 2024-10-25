@@ -52,13 +52,24 @@ char* SkipSpaces(char* ptr);
 
 //========ADDITIONAL===============
 void BinaryIntOutput(int number);
-void BinaryCharOutput(unsigned char number);
+void BinaryCharOutput(unsigned  char number);
 //=================================
+
+
+
+//=========EBANIY PARSER======================
+void SkipOp( struct Line_ptr* input );
+int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instruction );
+int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* instruction ) ;
+int GetArgNum( struct Line_ptr* input );
+
+//============================================
 
 struct Line_ptr
 {
     char* start;    
     int length;
+    int line_ip;
 };
 
 struct File_asm

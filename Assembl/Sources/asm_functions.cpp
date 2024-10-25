@@ -191,8 +191,6 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
 
 int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
 {
-    // char* in_buf = input->start;
-
     ON_DEBUG( char* instruction = (char*)(output->buffer + output->ip - 1); )
 
     input->start = SkipSpaces( input->start );
@@ -221,8 +219,6 @@ int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
 
         if( kolvo_arg == 2 ) 
         {
-            // printf("before register: %s\n", input->start);
-
             GetRegister( output, input, instruction );
             output->ip += 1;
 
@@ -242,9 +238,12 @@ int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
             output->ip += sizeof(AssemblerElem);
         }
 
-        printf("\n");
-        BinaryCharOutput( *instruction );
-        printf("\n");
+        ON_DEBUG
+        (
+            printf("\n");
+            BinaryCharOutput( *instruction );
+            printf("\n");
+        )
     }
     else 
     {
@@ -263,17 +262,16 @@ int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
         }
         else if ( kolvo_arg == 4)
         {
-            // printf(ORANGE "\nbefore writing value:\n" DELETE_COLOR);
-            // BinaryCharOutput( *instruction );
-            // printf("\n");
-
             GetValue( output, input, instruction );
             output->ip += sizeof(AssemblerElem);
         }
 
-        printf("\n");
-        BinaryCharOutput( *instruction );
-        printf("\n");
+        ON_DEBUG
+        (
+            printf("\n");
+            BinaryCharOutput( *instruction );
+            printf("\n");
+        )
     }
     
     return 0;
@@ -401,6 +399,7 @@ int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instru
     if ( sscanf(input->start, "%lf", &arg) == 1 )
     {
         *(AssemblerElem*)(output->buffer + output->ip ) = arg;
+        printf(ORANGE "value argument: %lf\n" DELETE_COLOR, arg);
 
         *instruction |= INPUT_MASK; //TODO:
 
@@ -420,29 +419,93 @@ int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instru
 
 
 
-
-
-
-
-int GetArgPop(struct Output_buffer* output, struct Line_ptr* line)  //TODO: сделать также как POP
+int GetArgPop( struct Output_buffer* output, struct Line_ptr* input ) 
 {
-    double arg = 0;
+    ON_DEBUG( char* instruction = (output->buffer + output->ip - 1); )
 
-    if ( sscanf( line->start + strlen("Pop"), "%lf", &arg) == 1 )
+    input->start = SkipSpaces( input->start );
+    input->start += strlen("pop");
+    input->start = SkipSpaces( input->start );
+
+    if ( strchr( input->start, '[' ) != nullptr )
     {
-        ON_DEBUG( printf("arg: %lf\n", arg); )  
+        printf("Pop from memory\n");
+        //===============================================================
+        if ( strchr( input->start, ']' ) != nullptr )
+        {
+            ;
+        }   
+        else 
+        {
+            printf(RED "WARNING: no closing bracket ']' \n" DELETE_COLOR);
+        }
+        //================================================================
 
-        *(double*)(output->buffer + output->ip) = arg;
-        output->ip += sizeof(AssemblerElem);
+        *(output->buffer + output->ip - 1) |= MEMORY_MASK;
 
-        return 0;
+        input->start += 1;
+
+        int kolvo_arg = GetArgNum( input );
+
+        if( kolvo_arg == 2 ) 
+        {
+            GetRegister( output, input, instruction );
+            output->ip += 1;
+
+            SkipOp( input );
+
+            GetValue( output, input, instruction );
+            output->ip += sizeof(AssemblerElem);
+        }
+        else if ( kolvo_arg == 3 )
+        {
+            GetRegister( output, input, instruction );
+            output->ip += 1;
+        }
+        else if ( kolvo_arg == 4)
+        {
+            GetValue( output, input, instruction );
+            output->ip += sizeof(AssemblerElem);
+        }
+
+        ON_DEBUG
+        (
+            printf("\n");
+            BinaryCharOutput( *instruction );
+            printf("\n");
+        )
     }
-    else
+    else 
     {
-        // printf("arg: huy\n");
-        return 1;
+        int kolvo_arg = GetArgNum( input );
+
+        // printf(RED "kod argumenta without[ ]: %d" DELETE_COLOR, kolvo_arg);
+
+        if( kolvo_arg == 2 ) 
+        {
+            printf(RED "warning: too many arguments for push" DELETE_COLOR);
+        }
+        else if ( kolvo_arg == 3 )
+        {
+            GetRegister( output, input, instruction );
+            output->ip += 1;
+        }
+        else if ( kolvo_arg == 4)
+        {
+            printf(RED "wrong command, maybe you ment 'OUT' ?\n" DELETE_COLOR);
+        }
+
+        ON_DEBUG
+        (
+            printf("\n");
+            BinaryCharOutput( *instruction );
+            printf("\n");
+        )
     }
-}
+    
+    return 0;
+    
+}   
 
 
 void OutputFile(struct File_code* file)

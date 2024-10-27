@@ -18,8 +18,9 @@ int main()
     proc.regs = regs_buffer;
 
     //==============MEMORY====================
-    proc.memory.ram = (ProcElem*)calloc( MEMORY_START_SIZE, sizeof(ProcElem) );
-    proc.memory.IP = 0;
+    proc.memory.capacity = MEMORY_START_SIZE;
+    proc.memory.ram = (ProcElem*)calloc( proc.memory.capacity, sizeof(ProcElem) );  
+    proc.memory.size = 0;
     proc.memory.access = true;
     //========================================
 
@@ -42,6 +43,7 @@ int main()
 
 
     Run( &proc );
+
 
     free( proc.memory.ram );
     free( proc.code );

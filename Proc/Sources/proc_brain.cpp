@@ -37,8 +37,7 @@ void Run(  struct SPU* proc_copy )
                 {
                     PRINT_PROCESS( printf("Push\n"); )
 
-                    proc->IP += 1;
-                    ProcElem arg = GetArgPush( command, proc ); //Takes all arguments of this command, one or two
+                    ProcElem arg = GetArgPush( proc ); //Takes all arguments of this command, one or two
 
                     PRINT_PROCESS( printf("arg: %lf\n", arg); )
 
@@ -47,13 +46,20 @@ void Run(  struct SPU* proc_copy )
                     continue;
                 }
 
-                // case kPop:
-                // {
-                //     PRINT_PROCESS( printf("Pop\n"); )
+                case kPop:
+                {
+                    PRINT_PROCESS( printf("Pop\n"); )
 
-                //     proc->IP += 1;
-                //     ProcElem arg = 0;
-                // }
+                    ProcElem arg = 0;
+
+                    arg = STACK_POP_CALL( &proc->stack );
+
+                    PRINT_PROCESS( printf("poped value: %lf\n", arg); )
+
+                    DoPop( arg, proc );
+
+                    continue;
+                }
 
                 //=====JUMP PROCESSING=============
                 case kJmpspace:
@@ -64,37 +70,37 @@ void Run(  struct SPU* proc_copy )
                 }
                 case kJa:
                 {        
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJae:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJb:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJbe:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJe:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJne:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
                 case kJmp:
                 {
-                    DoJump( command, proc );
+                    DoJump( proc );
                     continue;
                 }
 
@@ -132,8 +138,8 @@ void Run(  struct SPU* proc_copy )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, a + b);
+                    proc->IP += 1;
                     PAUSE;
                     continue;
                 }
@@ -144,8 +150,8 @@ void Run(  struct SPU* proc_copy )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, (b - a) );
+                    proc->IP += 1;
 
                     PAUSE;
                     continue;
@@ -157,8 +163,8 @@ void Run(  struct SPU* proc_copy )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, (a * b) );
+                    proc->IP += 1;
 
                     PAUSE;
                     continue;
@@ -170,8 +176,8 @@ void Run(  struct SPU* proc_copy )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                     ProcElem b = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, (b / a) );
+                    proc->IP += 1;
 
                     PAUSE;
                     continue;
@@ -182,8 +188,8 @@ void Run(  struct SPU* proc_copy )
                     PRINT_PROCESS( printf("Sin\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
                 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, sin( (double)a ) );
+                    proc->IP += 1;
 
                     continue;
                 }
@@ -193,8 +199,8 @@ void Run(  struct SPU* proc_copy )
                     PRINT_PROCESS( printf("Cos\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, cos( (double)a ) );
+                    proc->IP += 1;
                     
                     PAUSE;
                     continue;
@@ -205,8 +211,8 @@ void Run(  struct SPU* proc_copy )
                     PRINT_PROCESS( printf("Root\n"); )
                     ProcElem a = STACK_POP_CALL(&proc->stack);
 
-                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, sqrt( (double)a ) );
+                    proc->IP += 1;
 
                     PAUSE;
                     continue;
@@ -218,6 +224,13 @@ void Run(  struct SPU* proc_copy )
                     #ifdef DEBUG_STACK_FUNCS
                         StackDump( &proc->stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
                     #endif
+
+                    printf(ORANGE "REGISETRS:\n" DELETE_COLOR);
+                    for(int i = 0; i < 3; i++)
+                    {
+                        printf("[%d]: %lf\n", i, proc->regs[i] );
+                    }
+                    printf(ORANGE "END\n" DELETE_COLOR);
 
                     proc->IP += 1;
                     PAUSE;
@@ -234,10 +247,9 @@ void Run(  struct SPU* proc_copy )
                 }
 
 
-
                 case kNull:
                 {
-                    printf("huuuuuy\n");
+                    printf("NUUUUL\n");
 
                     proc->IP += 1;
                     PAUSE;

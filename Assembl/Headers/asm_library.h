@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "../../proc_project/enum.h"
+#include "../../proc_project/decoration.h"
 
 #ifndef ASSEMBLER_LIBRARY_HEADER
 #define ASSEMBLER_LIBRARY_HEADER

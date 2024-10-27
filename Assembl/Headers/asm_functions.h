@@ -104,9 +104,4 @@ struct File_code
     Output_buffer output_buffer;
 };
 
-
-const unsigned char MEMORY_MASK = 128;
-const unsigned char REGISTER_MASK = 64;
-const unsigned char INPUT_MASK = 32;
-
 #endif

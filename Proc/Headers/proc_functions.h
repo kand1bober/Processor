@@ -36,7 +36,8 @@ struct Line_ptr
 struct RAM 
 {
     ProcElem* ram;
-    uint64_t IP;
+    uint64_t size;
+    uint64_t capacity;
     bool access;
 };
 
@@ -44,7 +45,7 @@ struct SPU
 {
     uint64_t size_of_code;
 
-    uint64_t IP;
+    int64_t IP;
 
     Stack_t stack;
 
@@ -60,13 +61,11 @@ void Run( struct SPU* flow_copy );
 void InputFileCode( struct File_proc* file, struct SPU* proc );
 void BinaryIntOutput( int number );
 void BinaryCharOutput( unsigned char number );
-ProcElem GetArgPush( char command, struct SPU* proc );
-ProcElem GetArgPop( char command, struct SPU* proc );
-void DoJump( char command, struct SPU* proc );
 
-const unsigned char MEMORY_MASK = 128;
-const unsigned char REGISTER_MASK = 64;
-const unsigned char INPUT_MASK = 32;
+ProcElem GetArgPush( struct SPU* proc );
+int DoPop( ProcElem arg, struct SPU* proc );
+int DoJump( struct SPU* proc );
+
 
 const int MEMORY_START_SIZE = 100;
 

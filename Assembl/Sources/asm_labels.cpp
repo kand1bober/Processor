@@ -109,7 +109,8 @@ int WriteLabel(struct Label_table* spisok, char* ptr, size_t length)
 
 int GetArgJump(struct Output_buffer* output, Line_ptr* line, struct Label_table* spisok)
 {
-    char* buffer = line->start + strlen("Jmp"); //--> находим имя метки --> находим ей в массиве структур меток и берё её ip 
+    char* buffer = SkipSpaces(line->start);
+    buffer = SkipUntilSpace(buffer); //--> находим имя метки --> находим ей в массиве структур меток и берё её ip 
     buffer = SkipSpaces(buffer);
 
     Label* search = SearchLabel(spisok, buffer, strlen(buffer) );
@@ -182,6 +183,16 @@ char* SkipSpaces(char* ptr)
 {
     int i = 0;
     while( *(ptr + i) == ' ')
+    {
+        i++;
+    }
+    return ptr + i;
+}
+
+char* SkipUntilSpace( char* ptr )
+{
+    int i  = 0;
+    while( *(ptr + i) != ' ' )
     {
         i++;
     }

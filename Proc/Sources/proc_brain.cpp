@@ -1,6 +1,6 @@
-// #define DEBUG
+#define DEBUG
 #define STEP
-// #define RUN_PROC
+#define RUN_PROC
 
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
@@ -12,6 +12,7 @@ void Run(  struct SPU* proc_copy )
     printf("Run processor:\n\n");
 
     struct SPU* proc = proc_copy;
+
     while(1)
     {
         char command = *(proc->code + proc->IP);
@@ -30,7 +31,7 @@ void Run(  struct SPU* proc_copy )
         )
 
 
-        if ( proc->IP < proc->size_of_code)
+        if ( (uint64_t)proc->IP < proc->size_of_code)
         {
 
             switch( command_type )
@@ -70,6 +71,11 @@ void Run(  struct SPU* proc_copy )
                     proc->IP += 1;
                     continue;
                 }
+                case kRet:
+                {
+                    DoJump( proc );
+                    continue;
+                }
                 case kJa:
                 {        
                     DoJump( proc );
@@ -105,10 +111,9 @@ void Run(  struct SPU* proc_copy )
                     DoJump( proc );
                     continue;
                 }
-
                 case kCall:
                 {
-                    
+                    DoJump( proc );
                     continue;
                 }
                 //====END OF JUMP PROCESSING=========
@@ -211,9 +216,9 @@ void Run(  struct SPU* proc_copy )
                 case kRoot:
                 {
                     PRINT_PROCESS( printf("Root\n"); )
-                    ProcElem a = STACK_POP_CALL(&proc->stack);
+                    ProcElem a = STACK_POP_CALL( &proc->stack );
 
-                    STACK_PUSH_CALL(&proc->stack, sqrt( (double)a ) );
+                    STACK_PUSH_CALL(&proc->stack, sqrt( (ProcElem)a ) );
                     proc->IP += 1;
 
                     PAUSE;
@@ -258,7 +263,27 @@ void Run(  struct SPU* proc_copy )
                     PAUSE;
                     continue;
                 }
+
+                case kDraw:
+                {
+                    VideoCard( &proc->memory );
+                    proc->IP += 1;
+
+                    PAUSE;
+                    continue;
+                }
                 
+                case kFloor:
+                {
+                    PRINT_PROCESS( printf("Floor\n"); );
+                    ProcElem a = STACK_POP_CALL( &proc->stack );
+                    ProcElem b = 0;
+                    modf( a, &b );
+                    STACK_PUSH_CALL( &proc->stack, b );
+                    proc->IP += 1;
+                    continue;
+                }
+
                 default:
                 {
                     printf("SNTXERR: %d\n", command);

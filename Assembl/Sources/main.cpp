@@ -44,7 +44,6 @@ int main()
 
     free(input_file.buffer);
     free(output_file.output_buffer.buffer);
-
     free(input_file.lines_arr);
 
     return 0;

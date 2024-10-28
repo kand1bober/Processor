@@ -47,6 +47,7 @@ int WriteLabel(struct Label_table* spisok, char* ptr, size_t length);
 Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t size );
 void LabelDump(struct Label_table* spisok);
 char* SkipSpaces(char* ptr);
+char* SkipUntilSpace(char* ptr);
 //==================================================================
 
 
@@ -62,7 +63,7 @@ void SkipOp( struct Line_ptr* input );
 int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instruction );
 int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* instruction ) ;
 int GetArgNum( struct Line_ptr* input );
-
+void BufferResize( struct Output_buffer* output );
 //============================================
 
 struct Line_ptr
@@ -95,6 +96,7 @@ struct Output_buffer
 {
     char* buffer;
     int ip;
+    int capacity;
 };
 
 struct File_code
@@ -103,5 +105,6 @@ struct File_code
     char name[30];
     Output_buffer output_buffer;
 };
+
 
 #endif

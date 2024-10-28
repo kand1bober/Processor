@@ -7,26 +7,6 @@
 #include "../Headers/proc_macros.h"
 
 
-void BinaryCharOutput(unsigned char number)
-{
-    int l = 8 *  sizeof(number);
-    for (int i = l - 1; i >= 0; i--)
-    {
-        printf(YELLOW "%X" DELETE_COLOR , (unsigned)((number & (1 << i)) >> i) );
-    }
-    printf("\n");
-}
-
-
-void BinaryIntOutput(int number)
-{
-    int l = 8 *  sizeof(number);
-    for (int i = l - 1; i >= 0; i--)
-    {
-        printf(YELLOW "%X" DELETE_COLOR, (unsigned)((number & (1 << i)) >> i) );
-    }
-    printf("\n");
-}
 
 
 ProcElem GetArgPush( struct SPU* proc )
@@ -59,6 +39,7 @@ ProcElem GetArgPush( struct SPU* proc )
         ON_DEBUG_PROC( printf("push from memory, from [ %lu + %lu ] \n", first_arg, second_arg); )
 
         arg = *(ProcElem*)(proc->memory.ram + ram_addr);
+        proc->memory.size -= 1;
 
         proc->IP += sizeof( ProcElem );
     }
@@ -69,6 +50,8 @@ ProcElem GetArgPush( struct SPU* proc )
         ON_DEBUG_PROC( printf("push from memory, from register %d\n", *(char*)(proc->code + proc->IP) - kAX  ); )
 
         arg = *(ProcElem*)(proc->memory.ram + ram_addr);
+        proc->memory.size -= 1;
+
         proc->IP += 1;
     }
     else if( (mode & MEMORY_MASK ) && (mode & INPUT_MASK) )
@@ -78,6 +61,7 @@ ProcElem GetArgPush( struct SPU* proc )
         ram_addr = (uint64_t)(*(ProcElem*)(proc->code + proc->IP));
 
         arg = *(ProcElem*)(proc->memory.ram + ram_addr);
+        proc->memory.size -= 1;
 
         proc->IP += sizeof( ProcElem);
     }
@@ -105,8 +89,6 @@ ProcElem GetArgPush( struct SPU* proc )
 }
 
 
-//===================INPUT FUNCTIONS========================
-
 int DoPop( ProcElem arg, struct SPU* proc )
 {
     char command = *(char*)(proc->code + proc->IP);
@@ -133,6 +115,7 @@ int DoPop( ProcElem arg, struct SPU* proc )
 
         ram_addr += (uint64_t)( *(ProcElem*)(proc->code + proc->IP) );
         *(ProcElem*)(proc->memory.ram + ram_addr) = arg;
+        proc->memory.size += 1;
 
         ON_DEBUG_PROC( uint64_t second_arg = ram_addr - first_arg; )
 
@@ -151,6 +134,7 @@ int DoPop( ProcElem arg, struct SPU* proc )
         ON_DEBUG_PROC( printf(ORANGE "pop to memory, address from register %d, which contains %lu\n" DELETE_COLOR, reg_number, ram_addr); )
 
         *(ProcElem*)(proc->memory.ram + ram_addr) = arg;
+        proc->memory.size += 1;
 
         proc->IP += 1;
 
@@ -165,6 +149,7 @@ int DoPop( ProcElem arg, struct SPU* proc )
         ON_DEBUG_PROC( printf(ORANGE "pop to memory, addres from value:= %lu\n" DELETE_COLOR, ram_addr); )
 
         *(ProcElem*)(proc->memory.ram + ram_addr) = arg;
+        proc->memory.size += 1;
 
         return 0;
     }
@@ -202,8 +187,33 @@ int DoJump( struct SPU* proc)
         proc->IP = jump;
         return 0;
     }
-    else if( proc->stack.size > 1)
+    else if ( *( proc->code + proc->IP) == kCall )
+    {   
+        STACK_PUSH_CALL( &proc->calls_stack, (ProcElem)proc->IP + sizeof(ProcElem) + 1);  //для того, чтобы прыгал сразу на байт, стоящий за call'ом
+
+        proc->IP = (int64_t)( *(ProcElem*)( proc->code + proc->IP + 1 ) );
+
+        return 0;
+    }
+    else if ( *( proc->code + proc->IP) == kRet )
     {
+        printf("ret:\n");
+        uint64_t ret = 0;
+
+        if ( proc->calls_stack.size > 0 )
+        {
+            proc->IP = (uint64_t)STACK_POP_CALL( &proc->calls_stack );
+            return 0;
+        }
+        else
+        {
+            // STACK_PUSH_CALL( &proc->calls_stack, (ProcElem)RET_STACK_VALUE );
+            proc->IP += 1;
+            return 0;
+        }
+    }   
+    else if( proc->stack.size > 1)
+    {                             
         ProcElem a = STACK_POP_CALL( &proc->stack);
         ProcElem b = STACK_POP_CALL( &proc->stack);
 
@@ -221,7 +231,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -234,7 +244,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -247,7 +257,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -260,7 +270,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -273,7 +283,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -286,7 +296,7 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += 1;
+                    proc->IP += sizeof(ProcElem) + 1;
                 }
                 break;
             }
@@ -296,6 +306,8 @@ int DoJump( struct SPU* proc)
                 break;
             }
         }
+
+        return 0;
     }
     else 
     {
@@ -306,8 +318,54 @@ int DoJump( struct SPU* proc)
     return -1; //HUUUUUUUUUUUUUUUUY
 }
 
+//===============PROC CREATE===============
+int ProcCtor( struct SPU* proc, struct File_proc* file ) 
+{
+    int status = 0;
 
-//=============================================================================================
+    STACK_CTOR_CALL( &proc->stack, START_CAPACITY);
+    STACK_CTOR_CALL( &proc->calls_stack, START_CAPACITY);
+
+    proc->code = file->buffer;
+    proc->size_of_code = file->head.size_of_code;
+    proc->IP = 0;
+
+    status = RegCtor( proc);
+
+    status = RamCtor( &proc->memory );
+
+    if( !status )
+        return 0;
+    else
+        return -1;
+}
+
+int ProcDtor( struct SPU* proc )
+{
+    int status = 0;
+
+    free( proc->memory.ram );
+    free( proc->code );
+    free( proc->regs );
+
+    if( (!proc->memory.ram) && (!proc->code) && (!proc->regs) )
+        return 0;
+    else
+        return - 1;
+}
+//=========================================
+
+
+//===========REGISTER FUNCTIONS=============
+int RegCtor( struct SPU* proc )
+{
+    proc->regs = (double*)calloc( 3, sizeof(ProcElem) );
+    if( proc->regs )
+        return 0;
+    else
+        return -1;
+}
+
 void RegDump( ProcElem* regs )
 {
     for(int i = 0; i < 3; i++)
@@ -315,6 +373,7 @@ void RegDump( ProcElem* regs )
         printf("[%d]: %lf\n", i, regs[i] );
     }
 }
+//===========================================
 
 
 //================================= MEMORY FUNCTIONS ==========================================
@@ -325,7 +384,7 @@ int RamCtor( struct RAM* memory )
     memory->size = 0;
 
     //=====FILL WITH POISON=====
-    for(int i = 0; i < memory->capacity; i++)
+    for(uint64_t i = 0; i < memory->capacity; i++)
     {
         *(uint64_t*)(memory->ram + i) = RAM_POISON;
     }
@@ -341,11 +400,11 @@ void RamDump( struct RAM* memory)
 {
     printf(ORANGE "--------------------Memory Dump--------------------\n" DELETE_COLOR);
     
-    for(int i = 0; i < memory->capacity; i += 5 )
+    for(uint64_t i = 0; i < memory->capacity; i += 5 )
     {
-        for(int g = 0; g < 5; g++)
+        for(uint64_t g = 0; g < 5; g++)
         {
-            printf(GREEN "%10d" DELETE_COLOR, i + g);
+            printf(GREEN "%10ld" DELETE_COLOR, i + g);
         }
         printf("\n");
 
@@ -366,4 +425,56 @@ void RamDump( struct RAM* memory)
         printf("\n");
     }
 }
+
+
+int VideoCard( struct RAM* memory )
+{
+    printf(YELLOW "\nDrawing: mem_size = %lu\n------------------------\n" DELETE_COLOR, memory->size);
+
+    for(uint64_t i = 0; i < memory->size; i += 21)
+    {
+        for( uint64_t g = 0; (g < 21) && (i + g < memory->size); g++ )
+        {   
+            if ( fabs( *(ProcElem*)(memory->ram + i + g) ) < 0.000001 )
+            {
+                printf("-");
+                // printf("[%lu]:  '*' ---  ", i + g );
+                // printf("%lf, %lf\n", ( *(ProcElem*)(memory->ram + i + g) ),  fabs( *(ProcElem*)(memory->ram + i + g) )  );
+            }
+            else if ( fabs( *(ProcElem*)(memory->ram + i + g) - 1 ) < 0.000001 )
+            {
+                printf("*");
+                // printf("[%lu]:  ' ' ---  ", i + g );
+                // printf("%lf, %lf\n", ( *(ProcElem*)(memory->ram + i + g) ) ,  fabs( *(ProcElem*)(memory->ram + i + g) - 1 ) );
+            }
+        }
+
+        printf("\n");
+    }
+    printf(YELLOW "------------------------\n" DELETE_COLOR);
+
+    return 0;
+}
 //===================================================================
+
+
+void BinaryCharOutput(unsigned char number)
+{
+    int l = 8 *  sizeof(number);
+    for (int i = l - 1; i >= 0; i--)
+    {
+        printf(YELLOW "%X" DELETE_COLOR , (unsigned)((number & (1 << i)) >> i) );
+    }
+    printf("\n");
+}
+
+
+void BinaryIntOutput(int number)
+{
+    int l = 8 *  sizeof(number);
+    for (int i = l - 1; i >= 0; i--)
+    {
+        printf(YELLOW "%X" DELETE_COLOR, (unsigned)((number & (1 << i)) >> i) );
+    }
+    printf("\n");
+}

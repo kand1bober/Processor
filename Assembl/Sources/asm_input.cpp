@@ -52,6 +52,7 @@ void CreateLinePointers(struct File_asm* file)
             file->buffer[i] = '\0';
             (file->lines_amount)++;
         }
+        //TODO:  
     }
 
     file->lines_arr = (struct Line_ptr*)calloc( file->lines_amount + 1, sizeof( *file->lines_arr ) );

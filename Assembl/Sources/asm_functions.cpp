@@ -1,3 +1,4 @@
+#include <cstdio>
 #define PRINT_DEBUG
 
 
@@ -20,8 +21,11 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
     FindLabels(&spisok, file_a);
 
     
-    output->buffer = (char*)calloc(file_a->size_of_file, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
+    output->buffer = (char*)calloc( 10, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
     output->ip = 0;
+    output->capacity = 10;
+
+
     char command_name[20] = {};
 
     //==================FIRST PROCESSING==========================
@@ -36,9 +40,10 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
             printf("iteration %d:   %s\n", i, command_name );
         )
 
-        //====Fill char array with comands and argumants===
+        BufferResize( output );
+
         GetArg( command_name, &file_a->lines_arr[i], output, &spisok);
-        //==================================================
+        
 
         ON_DEBUG( printf(ORANGE "\nip after iteration: %d\n" DELETE_COLOR, output->ip); )
     }
@@ -55,6 +60,8 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
         memcpy(target, &value, sizeof(AssemblerElem) );  //TODO: зависит ли от типа ?
     }
     //=================END OF SECOND===============================
+
+    output->buffer = (char*)realloc( output->buffer, output->ip );
 
     LabelDump(&spisok); 
 
@@ -84,6 +91,7 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         {"AX", kAX},
         {"BX", kBX},
         {"CX", kCX},
+        {"DX", kDX},
         
         {"ja", kJa},
         {"jae", kJae},
@@ -96,6 +104,8 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 
         {"call", kCall},
         {"ret", kRet},
+        {"draw", kDraw},
+        {"floor", kFloor},
     };
     
     int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
@@ -123,13 +133,13 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
         else if(( command_code == kJa ) || ( command_code == kJae ) || 
                 ( command_code == kJb ) || ( command_code == kJbe ) || 
                 ( command_code == kJe ) || ( command_code == kJne ) || 
-                ( command_code == kJmp)) 
+                ( command_code == kJmp) || ( command_code == kCall)) 
         {
             GetArgJump(output, line, spisok);
         }
         else 
         {
-            // printf("zero argumants\n");
+            // printf("zero arguments\n");
         }
     }
     else
@@ -297,7 +307,7 @@ int GetArgNum( struct Line_ptr* input )
     }
     else if ( sscanf(input->start, "%2c", trash) == 1)
     {
-        if ( (strcmp( trash, "AX") == 0 ) || ( strcmp( trash, "BX") == 0 ) || ( strcmp( trash, "CX") == 0 ) )
+        if ( (strcmp( trash, "AX") == 0 ) || ( strcmp( trash, "BX") == 0 ) || ( strcmp( trash, "CX") == 0 ) || ( strcmp( trash, "DX") == 0 ) )
         {
             ON_DEBUG( printf(SINIY "Only register argument\n" DELETE_COLOR); )
             return 3;
@@ -345,7 +355,7 @@ int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* ins
 
     if ( sscanf(input->start, "%c", &first_letter ) == 1 )
     {
-        if ( (first_letter == 'A') || (first_letter == 'B') || (first_letter == 'C') )
+        if ( (first_letter == 'A') || (first_letter == 'B') || (first_letter == 'C') || (first_letter == 'D') )
         {
             input->start += 1;
 
@@ -383,6 +393,11 @@ int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* ins
         case 'C':
         {
             *(char*)( output->buffer + output->ip ) = kCX;
+            break;
+        }
+        case 'D':
+        {
+            *(char*)( output->buffer + output->ip ) = kDX;
             break;
         }
     }
@@ -505,6 +520,22 @@ int GetArgPop( struct Output_buffer* output, struct Line_ptr* input )
     return 0;
     
 }   
+
+
+void BufferResize( struct Output_buffer* output )
+{
+    printf("ip: %d capacity: %d\n", output->ip, output->capacity);
+    if ( output->ip + 10 >= output->capacity )
+    {
+        ON_DEBUG( printf(RED "resizing\n" DELETE_COLOR); )
+        output->buffer = (char*)realloc( output->buffer, output->capacity * 2 );
+        output->capacity *= 2;
+    }
+    else 
+    {
+        ;
+    } 
+}
 
 
 void OutputFile(struct File_code* file)

@@ -44,15 +44,13 @@ struct RAM
 struct SPU
 {
     uint64_t size_of_code;
-
     int64_t IP;
-
     Stack_t stack;
+    Stack_t calls_stack;
+    int count_calls;
 
     char* code;
-
     ProcElem* regs;
-    
     RAM memory;
 };
 
@@ -65,13 +63,19 @@ void BinaryCharOutput( unsigned char number );
 ProcElem GetArgPush( struct SPU* proc );
 int DoPop( ProcElem arg, struct SPU* proc );
 int DoJump( struct SPU* proc );
+int VideoCard( struct RAM* memory );
 
+int ProcCtor( struct SPU* proc, struct File_proc* file );
+int ProcDtor( struct SPU* proc ); 
 int RamCtor( struct RAM* memory );
 void RamDump( struct RAM* memory );
+int RegCtor( struct SPU* proc );
 void RegDump( ProcElem* regs );
 
 
 const int MEMORY_START_SIZE = 60;
+const uint64_t RET_STACK_VALUE = 0xB1ADE5;
+const double EPSILON = 0.001;
 
 
 #endif

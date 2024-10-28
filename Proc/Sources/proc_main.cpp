@@ -17,12 +17,8 @@ int main()
     double* regs_buffer = (double*)calloc( 3, sizeof(double) );
     proc.regs = regs_buffer;
 
-    //==============MEMORY====================
-    proc.memory.capacity = MEMORY_START_SIZE;
-    proc.memory.ram = (ProcElem*)calloc( proc.memory.capacity, sizeof(ProcElem) );  
-    proc.memory.size = 0;
-    proc.memory.access = true;
-    //========================================
+
+    RamCtor( &proc.memory );
 
 
     //============CHECK===========================
@@ -32,15 +28,7 @@ int main()
     }
     printf("\n");
     //============================================
-
-    // unsigned char test = 126;
-    // BinaryCharOutput(test);
-
-    // char test_1 = ( test & ( ~(255 << 5) ) );
-
-    // // BinaryCharOutput( 123 );
-    // BinaryCharOutput( test_1 );
-
+    
 
     Run( &proc );
 

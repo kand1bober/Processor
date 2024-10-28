@@ -3,18 +3,31 @@
 #define PROC_MACROS_HEADER
 
 
-#ifdef DEBUG
+    #ifdef DEBUG
 
-    #define ON_DEBUG_PROC( expr ) expr
-    #define PRINT_PROCESS( expr ) expr
-    #define PAUSE getchar() 
+        #define ON_DEBUG_PROC( expr ) expr
+        #define PRINT_PROCESS( expr ) expr
 
-#else 
+    #else 
 
-    #define ON_DEBUG_PROC( expr ) 
-    #define PRINT_PROCESS( expr )
-    #define PAUSE 
+        #define ON_DEBUG_PROC( expr ) 
+        #define PRINT_PROCESS( expr )
+        
+    #endif
 
-#endif
+
+    #ifdef STEP
+        #define PAUSE getchar() 
+    #else       
+        #define PAUSE 
+    #endif
+
+
+    #ifdef RUN_PROC
+        #define RUN( expr ) expr
+    #else       
+        #define RUN( expr )
+    #endif
+     
 
 #endif

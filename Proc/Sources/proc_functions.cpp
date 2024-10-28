@@ -1,4 +1,6 @@
-#define DEBUG
+// #define DEBUG
+#define STEP
+// #define RUN_PROC
 
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_library.h"
@@ -98,10 +100,6 @@ ProcElem GetArgPush( struct SPU* proc )
     {
         printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR);
     }
- 
-    // printf(RED "before: IP: %lu\n" DELETE_COLOR, proc->IP);
-    // 
-    // printf(RED "after: IP: %lu\n" DELETE_COLOR, proc->IP);
 
     return arg;
 }
@@ -175,13 +173,9 @@ int DoPop( ProcElem arg, struct SPU* proc )
 
         reg_number = *(char*)(proc->code + proc->IP) - kAX;
 
-        printf("reg number: %d", reg_number);
-
         ON_DEBUG_PROC( printf(ORANGE "pop to register %d\n" DELETE_COLOR, reg_number); )
 
         proc->regs[reg_number] = arg;
-
-        printf("reg contains: %lf", proc->regs[reg_number]);
 
         proc->IP += 1;
 
@@ -192,10 +186,6 @@ int DoPop( ProcElem arg, struct SPU* proc )
         printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR);
         return -1;
     }
- 
-    // printf(RED "before: IP: %lu\n" DELETE_COLOR, proc->IP);
-    // 
-    // printf(RED "after: IP: %lu\n" DELETE_COLOR, proc->IP);
 
     return -1; 
 }
@@ -315,19 +305,65 @@ int DoJump( struct SPU* proc)
 
     return -1; //HUUUUUUUUUUUUUUUUY
 }
+
+
 //=============================================================================================
-
-
-//================================= MEMORY FUNCTIONS ==========================================
-
-void RamDump( struct RAM* memory)
+void RegDump( ProcElem* regs )
 {
-    printf(RED "Memory Demp\n" DELETE_COLOR);
-    
-    for(int i = 0; i < memory->capacity; i++)
+    for(int i = 0; i < 3; i++)
     {
-        printf("%8d", i);
+        printf("[%d]: %lf\n", i, regs[i] );
     }
 }
 
-//=============================================================================================
+
+//================================= MEMORY FUNCTIONS ==========================================
+int RamCtor( struct RAM* memory )
+{
+    memory->capacity = MEMORY_START_SIZE;
+    memory->ram = (ProcElem*)calloc( memory->capacity, sizeof(ProcElem) );  
+    memory->size = 0;
+
+    //=====FILL WITH POISON=====
+    for(int i = 0; i < memory->capacity; i++)
+    {
+        *(uint64_t*)(memory->ram + i) = RAM_POISON;
+    }
+    //==========================
+
+    memory->access = true;
+
+    return 0;
+}
+
+
+void RamDump( struct RAM* memory)
+{
+    printf(ORANGE "--------------------Memory Dump--------------------\n" DELETE_COLOR);
+    
+    for(int i = 0; i < memory->capacity; i += 5 )
+    {
+        for(int g = 0; g < 5; g++)
+        {
+            printf(GREEN "%10d" DELETE_COLOR, i + g);
+        }
+        printf("\n");
+
+        for(int k = 0; k < 5; k++)
+        {
+            ProcElem elem = *(double*)(memory->ram + i + k);
+            uint64_t hex_elem = *(uint64_t*)(memory->ram + i + k);
+
+            if( hex_elem == RAM_POISON)
+            {
+                printf("%10lX", hex_elem );
+            }
+            else 
+            {
+                printf(SINIY "%10.4lf" DELETE_COLOR, elem );
+            }
+        }
+        printf("\n");
+    }
+}
+//===================================================================

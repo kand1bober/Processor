@@ -1,4 +1,6 @@
-#define DEBUG
+// #define DEBUG
+#define STEP
+// #define RUN_PROC
 
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
@@ -220,17 +222,18 @@ void Run(  struct SPU* proc_copy )
 
                 case kDump:
                 {
-                    PRINT_PROCESS( printf("Dump\n"); )
+                    printf(YELLOW "-----------------------DUMP-----------------------\n" DELETE_COLOR); 
                     #ifdef DEBUG_STACK_FUNCS
                         StackDump( &proc->stack, __FILE__, __PRETTY_FUNCTION__, __LINE__);
                     #endif
 
                     printf(ORANGE "REGISETRS:\n" DELETE_COLOR);
-                    for(int i = 0; i < 3; i++)
-                    {
-                        printf("[%d]: %lf\n", i, proc->regs[i] );
-                    }
-                    printf(ORANGE "END\n" DELETE_COLOR);
+                    RegDump( proc->regs );
+
+                    printf(ORANGE "MEMORY:\n" DELETE_COLOR);
+                    RamDump( &proc->memory );
+
+                    printf(ORANGE "-------------------END OF DUMP-------------------\n" DELETE_COLOR);
 
                     proc->IP += 1;
                     PAUSE;

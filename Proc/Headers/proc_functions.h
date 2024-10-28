@@ -66,7 +66,12 @@ ProcElem GetArgPush( struct SPU* proc );
 int DoPop( ProcElem arg, struct SPU* proc );
 int DoJump( struct SPU* proc );
 
+int RamCtor( struct RAM* memory );
+void RamDump( struct RAM* memory );
+void RegDump( ProcElem* regs );
 
-const int MEMORY_START_SIZE = 100;
+
+const int MEMORY_START_SIZE = 60;
+
 
 #endif

@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -73,9 +74,11 @@ int RegCtor( struct SPU* proc );
 void RegDump( ProcElem* regs );
 
 
-const int MEMORY_START_SIZE = 60;
+const int MEMORY_START_SIZE = 1000;
 const uint64_t RET_STACK_VALUE = 0xB1ADE5;
-const double EPSILON = 0.001;
+const uint64_t REGS_AMOUNT = 4;
+const double EPSILON = 0.5;
+const double NORMAL_EPSILON = 0.5;
 
 
 #endif

@@ -29,9 +29,6 @@ int main()
     else
         printf(RED "proc wasn't created\n" DELETE_COLOR);
 
-
-    ProcDtor( &proc );
-
     return 0;   
 }
 

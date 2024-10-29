@@ -1,6 +1,6 @@
-// #define DEBUG
-#define STEP
-// #define RUN_PROC
+#define DEBUG
+// #define STEP
+#define RUN_PROC
 
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_library.h"
@@ -102,7 +102,7 @@ int DoPop( ProcElem arg, struct SPU* proc )
     )
 
     uint64_t ram_addr = 0;
-    uint8_t reg_number = 0;
+    size_t reg_number = 0;
 
     if ( (mode & MEMORY_MASK ) && (mode & REGISTER_MASK) && (mode & INPUT_MASK) )
     {
@@ -127,11 +127,10 @@ int DoPop( ProcElem arg, struct SPU* proc )
     }
     else if ( (mode & MEMORY_MASK ) && (mode & REGISTER_MASK) )
     {
- 
         reg_number = *(char*)(proc->code + proc->IP) - kAX;
         ram_addr += (uint64_t)proc->regs[reg_number];
 
-        ON_DEBUG_PROC( printf(ORANGE "pop to memory, address from register %d, which contains %lu\n" DELETE_COLOR, reg_number, ram_addr); )
+        ON_DEBUG_PROC( printf(ORANGE "pop to memory, address from register %lu, which contains %lu\n" DELETE_COLOR, reg_number, ram_addr); )
 
         *(ProcElem*)(proc->memory.ram + ram_addr) = arg;
         proc->memory.size += 1;
@@ -142,7 +141,6 @@ int DoPop( ProcElem arg, struct SPU* proc )
     }
     else if( (mode & MEMORY_MASK ) && (mode & INPUT_MASK) )
     {
-
         ram_addr += (uint64_t)( *(ProcElem*)(proc->code + proc->IP) );
         proc->IP += sizeof( ProcElem);
 
@@ -155,12 +153,11 @@ int DoPop( ProcElem arg, struct SPU* proc )
     }
     else if( mode & REGISTER_MASK )
     {
+        reg_number = ( *(char*)(proc->code + proc->IP) - kAX );
 
-        reg_number = *(char*)(proc->code + proc->IP) - kAX;
+        ON_DEBUG_PROC( printf(ORANGE "pop to register %lu\n" DELETE_COLOR, reg_number); )
 
-        ON_DEBUG_PROC( printf(ORANGE "pop to register %d\n" DELETE_COLOR, reg_number); )
-
-        proc->regs[reg_number] = arg;
+        *(ProcElem*)(proc->regs + reg_number) = arg;
 
         proc->IP += 1;
 
@@ -198,7 +195,6 @@ int DoJump( struct SPU* proc)
     else if ( *( proc->code + proc->IP) == kRet )
     {
         printf("ret:\n");
-        uint64_t ret = 0;
 
         if ( proc->calls_stack.size > 0 )
         {
@@ -225,26 +221,26 @@ int DoJump( struct SPU* proc)
             case kJa:
             {   
                 jump = (int64_t)( *(ProcElem*)( proc->code + proc->IP ) );
-                if (b > a)
+                if ( b > a )
                 {
                     proc->IP = jump;
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
             case kJae:
             {   
                 jump = (int64_t)( *(ProcElem*)( proc->code + proc->IP ) );
-                if (b >= a)
+                if ( (b > a) || ( fabs( b - a ) < EPSILON ) )
                 {
                     proc->IP = jump;
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
@@ -257,46 +253,46 @@ int DoJump( struct SPU* proc)
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
             case kJbe:
             {
                 jump = (int64_t)( *(ProcElem*)( proc->code + proc->IP ) );
-                if (b <= a)
+                if ( (b < a) || ( fabs( a -b ) < EPSILON ) )
                 {
                     proc->IP = jump;
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
             case kJe:
             {
                 jump = (int64_t)( *(ProcElem*)( proc->code + proc->IP ) );
-                if (b == a)
+                if ( fabs( b - a ) < EPSILON )
                 {
                     proc->IP = jump;
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
             case kJne:
             {
                 jump = (int64_t)( *(ProcElem*)( proc->code + proc->IP ) );
-                if (b != a)
+                if ( fabs( b - a ) > EPSILON )
                 {
                     proc->IP = jump;
                 }
                 else 
                 {
-                    proc->IP += sizeof(ProcElem) + 1;
+                    proc->IP += sizeof(ProcElem);
                 }
                 break;
             }
@@ -342,8 +338,8 @@ int ProcCtor( struct SPU* proc, struct File_proc* file )
 
 int ProcDtor( struct SPU* proc )
 {
-    int status = 0;
-
+    STACK_DTOR_CALL(&proc->stack);
+    STACK_DTOR_CALL( &proc->calls_stack);
     free( proc->memory.ram );
     free( proc->code );
     free( proc->regs );
@@ -359,7 +355,7 @@ int ProcDtor( struct SPU* proc )
 //===========REGISTER FUNCTIONS=============
 int RegCtor( struct SPU* proc )
 {
-    proc->regs = (double*)calloc( 3, sizeof(ProcElem) );
+    proc->regs = (ProcElem*)calloc( REGS_AMOUNT, sizeof(ProcElem) );
     if( proc->regs )
         return 0;
     else
@@ -431,21 +427,17 @@ int VideoCard( struct RAM* memory )
 {
     printf(YELLOW "\nDrawing: mem_size = %lu\n------------------------\n" DELETE_COLOR, memory->size);
 
-    for(uint64_t i = 0; i < memory->size; i += 21)
+    for(uint64_t i = 0; i < memory->size; i += 31)
     {
-        for( uint64_t g = 0; (g < 21) && (i + g < memory->size); g++ )
+        for( uint64_t g = 0; (g < 31) && (i + g < memory->size); g++ )
         {   
-            if ( fabs( *(ProcElem*)(memory->ram + i + g) ) < 0.000001 )
+            if ( fabs( *(ProcElem*)(memory->ram + i + g) ) < NORMAL_EPSILON )
             {
-                printf("-");
-                // printf("[%lu]:  '*' ---  ", i + g );
-                // printf("%lf, %lf\n", ( *(ProcElem*)(memory->ram + i + g) ),  fabs( *(ProcElem*)(memory->ram + i + g) )  );
+                printf("**");
             }
-            else if ( fabs( *(ProcElem*)(memory->ram + i + g) - 1 ) < 0.000001 )
+            else if ( fabs( *(ProcElem*)(memory->ram + i + g) - 1 ) < NORMAL_EPSILON )
             {
-                printf("*");
-                // printf("[%lu]:  ' ' ---  ", i + g );
-                // printf("%lf, %lf\n", ( *(ProcElem*)(memory->ram + i + g) ) ,  fabs( *(ProcElem*)(memory->ram + i + g) - 1 ) );
+                printf("  ");
             }
         }
 

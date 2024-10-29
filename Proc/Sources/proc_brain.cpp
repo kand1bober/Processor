@@ -1,5 +1,5 @@
 #define DEBUG
-#define STEP
+// #define STEP
 #define RUN_PROC
 
 #include "../Headers/proc_library.h"
@@ -248,7 +248,7 @@ void Run(  struct SPU* proc_copy )
                 case kHlt:
                 {
                     PRINT_PROCESS( printf("Hlt\n"); )
-                    STACK_DTOR_CALL(&proc->stack);
+                    ProcDtor( proc );
                     printf("Processor stopped\n");
                     PAUSE;
                     break;
@@ -298,6 +298,7 @@ void Run(  struct SPU* proc_copy )
         else 
         {
             printf("Reached the end of programm with no halt, stoping\n");
+            ProcDtor( proc );
             break;
         }
     }

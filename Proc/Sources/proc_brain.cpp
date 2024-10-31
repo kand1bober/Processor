@@ -1,6 +1,6 @@
-#define DEBUG
+// #define DEBUG
 // #define STEP
-#define RUN_PROC
+// #define RUN_PROC
 
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
@@ -19,9 +19,9 @@ void Run(  struct SPU* proc_copy )
 
         char command_type = ( (command  & ~(255 << 5)) );
 
-        printf("\n");
         ON_DEBUG_PROC
         (   
+            printf("\n");
             printf(RED "Begin of cycle\n" DELETE_COLOR);
             printf("IP: %lu\n", proc->IP);
             printf(SINIY "Command, all 8 bits:\n" DELETE_COLOR);
@@ -67,7 +67,6 @@ void Run(  struct SPU* proc_copy )
                 //=====JUMP PROCESSING=============
                 case kJmpspace:
                 {
-                    printf(RED "JumpSpace skipped\n" DELETE_COLOR);
                     proc->IP += 1;
                     continue;
                 }
@@ -124,7 +123,7 @@ void Run(  struct SPU* proc_copy )
                     ProcElem arg = 0;
                     proc->IP += 1;
                     arg = STACK_POP_CALL(&proc->stack);
-                    printf("%lf\n", arg);
+                    PRINT_PROCESS( printf("%lf\n", arg); )
                     PAUSE;
                     continue;
                 }
@@ -257,7 +256,7 @@ void Run(  struct SPU* proc_copy )
 
                 case kNull:
                 {
-                    printf("NUUUUL\n");
+                    PRINT_PROCESS( printf("NUUUUL\n"); )
 
                     proc->IP += 1;
                     PAUSE;
@@ -286,7 +285,7 @@ void Run(  struct SPU* proc_copy )
 
                 default:
                 {
-                    printf("SNTXERR: %d\n", command);
+                    PRINT_PROCESS( printf("SNTXERR: %d\n", command); )
 
                     proc->IP += 1;
                     PAUSE;

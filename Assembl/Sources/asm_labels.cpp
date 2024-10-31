@@ -1,8 +1,8 @@
-#define PRINT_DEBUG
+// #define PRINT_DEBUG
 
+#include "../Headers/asm_macros.h"
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
-#include "../Headers/asm_macros.h"
 
 
 void LabelTableCtor(struct Label_table* spisok)
@@ -29,7 +29,7 @@ void FindLabels(struct Label_table* spisok, struct File_asm* file)
     for (int i = 0; i < file->lines_amount; i++)
     {
         ON_DEBUG( printf("%s\n", file->lines_arr[i].start); ) 
-        //TODO: LabelParser()
+
         if ( ( ptr1 = strchr( file->lines_arr[i].start, ':' ) ) != nullptr ) 
         {
             if ( ( ptr2 = strchr( file->lines_arr[i].start, ' ' ) ) != nullptr)
@@ -178,6 +178,7 @@ void LabelDump(struct Label_table* spisok)
     printf(DELETE_COLOR SINIY "===End of the dump===\n\n" DELETE_COLOR);
 }
 
+// TODO: utilities.cpp, utiltiies.h
 
 char* SkipSpaces(char* ptr)
 {

@@ -6,7 +6,6 @@ int main()
     struct File_asm input_file = {};
     struct File_code output_file = {};
 
-
     printf("type number of file with programm\n");
     unsigned file_number = 0;
     scanf("%u", &file_number);

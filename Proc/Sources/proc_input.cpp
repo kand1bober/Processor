@@ -62,13 +62,15 @@ void InputFileCode(struct File_proc* file, struct SPU* proc)
     fread(&file->head, sizeof(file->head), 1, input_file);
 
     file->buffer = (char*)calloc(file->head.size_of_code, sizeof(char) );
-    printf("Header:\n"
-           "author: %X\n"
-           "size_of_code:%d\n"
-           "version of coding: %d\n\n", file->head.sign, file->head.size_of_code, file->head.ver);
+    ON_DEBUG
+    ( 
+        printf("Header:\n"
+            "author: %X\n"
+            "size_of_code:%d\n"
+            "version of coding: %d\n\n", file->head.sign, file->head.size_of_code, file->head.ver);
 
-    // fseek(input_file, sizeof(char) * 16L,  SEEK_SET);
-    printf("Position: %ld\n", ftell(input_file) );
+        printf("Position: %ld\n", ftell(input_file) );
+    )
 
     fread( file->buffer, sizeof(char), file->head.size_of_code, input_file ); assert(fread);
     fclose(input_file);

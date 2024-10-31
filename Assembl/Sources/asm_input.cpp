@@ -1,4 +1,8 @@
+#define PRINT_DEBUG
+
+#include "../Headers/asm_macros.h"
 #include "../Headers/asm_functions.h"
+
 
 //======READING TO THE char* BUFFER=======
 void InputFileStruct(struct File_asm* file)
@@ -18,7 +22,7 @@ void InputFileStruct(struct File_asm* file)
     stat(filepath, &file_info);
 
     unsigned long int size_of_stream = (unsigned long int)file_info.st_size;
-    printf("size of file: %lu\n", size_of_stream);
+    ON_DEBUG( printf("size of file: %lu\n", size_of_stream); )
 
     file->size_of_file = size_of_stream;
 
@@ -32,12 +36,16 @@ void InputFileStruct(struct File_asm* file)
     CountManAndArg(file);
 
     printf("amount of lines: %d\nsize of code: %d\n", file->lines_amount, file->size_of_code);
-    printf("Strings printed by pointers to them:\n");
-    for(int i = 0; i < file->lines_amount; i++)
-    {
-        printf("%3d:  %-13s   length: %d\n", i , file->lines_arr[i].start, file->lines_arr[i].length);
-    }
-    printf("\n\n");
+
+    ON_DEBUG
+    (
+        printf("Strings printed by pointers to them:\n");
+        for(int i = 0; i < file->lines_amount; i++)
+        {
+            printf("%3d:  %-13s   length: %d\n", i , file->lines_arr[i].start, file->lines_arr[i].length);
+        }
+        printf("\n\n");
+    )
 }
 //=================================================
 
@@ -52,7 +60,7 @@ void CreateLinePointers(struct File_asm* file)
             file->buffer[i] = '\0';
             (file->lines_amount)++;
         }
-        //TODO:  
+        //TODO:  пропуск пустой строки 
     }
 
     file->lines_arr = (struct Line_ptr*)calloc( file->lines_amount + 1, sizeof( *file->lines_arr ) );

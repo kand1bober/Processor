@@ -1,18 +1,51 @@
-#include <cstdio>
-#define PRINT_DEBUG
+// #define PRINT_DEBUG
 
-
+#include <stdio.h>
 #include <string.h>
 
+#include "../Headers/asm_macros.h"
 #include "../Headers/asm_library.h"
 #include "../Headers/asm_functions.h"
-#include "../Headers/asm_macros.h"
 
+const struct Cmd_strings CmdArray[] =
+    {
+        {"null", kNull},
+        {"push", kPush},
+        {"pop",  kPop},
+        {"out",  kOut},
+        {"add",  kAdd},
+        {"in",   kIn},
+        {"sub",  kSub},
+        {"mul",  kMul},
+        {"div",  kDiv},
+        {"root", kRoot},
+        {"sin",  kSin},
+        {"cos",  kCos},
+        {"dump", kDump},
+        {"hlt",  kHlt},
 
+        {"AX",   kAX},
+        {"BX",   kBX},
+        {"CX",   kCX},
+        {"DX",   kDX},
+        
+        {"ja",   kJa},
+        {"jae",  kJae},
+        {"jb",   kJb},
+        {"jbe",  kJbe},
+        {"je",   kJe},
+        {"jne",  kJne},
+        {"jmp",  kJmp},
+        {"jmpspace", kJmpspace},
+
+        {"call",  kCall},
+        {"ret",   kRet},
+        {"draw",  kDraw},
+        {"floor", kFloor},
+    };
 
 //=====CONVERT TO CODE AND WRITE IN OUTPUT======
 
-// TODO: input.cpp
 void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 {
     struct Label_table spisok = {};
@@ -20,11 +53,9 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 
     FindLabels(&spisok, file_a);
 
-    
     output->buffer = (char*)calloc( 10, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
     output->ip = 0;
     output->capacity = 10;
-
 
     char command_name[20] = {};
 
@@ -70,47 +101,10 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 
 
 void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* output, struct Label_table* spisok)
-{
-    struct Cmd_strings CmdArray[] = 
-    {
-        {"null", kNull},
-        {"push", kPush},
-        {"pop", kPop},
-        {"out", kOut},
-        {"add", kAdd},
-        {"in", kIn},
-        {"sub", kSub},
-        {"mul", kMul},
-        {"div", kDiv},
-        {"root", kRoot},
-        {"sin", kSin},
-        {"cos", kCos},
-        {"dump", kDump},
-        {"hlt", kHlt},
+{    
+    const size_t size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
 
-        {"AX", kAX},
-        {"BX", kBX},
-        {"CX", kCX},
-        {"DX", kDX},
-        
-        {"ja", kJa},
-        {"jae", kJae},
-        {"jb", kJb},
-        {"jbe", kJbe},
-        {"je", kJe},
-        {"jne", kJne},
-        {"jmp", kJmp},
-        {"jmpspace", kJmpspace},
-
-        {"call", kCall},
-        {"ret", kRet},
-        {"draw", kDraw},
-        {"floor", kFloor},
-    };
-    
-    int size = sizeof( CmdArray ) / sizeof( CmdArray[0] );
-
-    int status = GetName( command_name, output, spisok, CmdArray, size );
+    int status = GetName( command_name, output, spisok, size );
 
     if( status == 0)
     {   
@@ -118,9 +112,9 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 
         if ( command_code == kPush)
         {
-            BinaryCharOutput( *(char*)(output->buffer + output->ip - 1) );
             ON_DEBUG
             ( 
+                BinaryCharOutput( *(char*)(output->buffer + output->ip - 1) );
                 printf("\n");
                 GetArgPush(output, line);
                 printf("\n");
@@ -149,7 +143,7 @@ void GetArg(char* command_name, struct Line_ptr* line, struct Output_buffer* out
 }
 
 
-int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, struct Cmd_strings* array, int size)
+int GetName( char* command_name, struct Output_buffer* output, struct Label_table* spisok, int size)
 {
     int status = 1;
     Label* search = {};
@@ -158,9 +152,9 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
 
     for(int i = 0; (i < size); i++ )
     {
-        if ( strcmp ( array[i].name , command_name ) == 0 )
+        if ( strcmp ( CmdArray[i].name , command_name ) == 0 )
         {
-            *(char*)( output->buffer + output->ip ) = array[i].number;
+            *(char*)( output->buffer + output->ip ) = CmdArray[i].number;
 
             ON_DEBUG( printf("enum code: %d\n", *(char*)(output->buffer + output->ip) ); )
 
@@ -200,24 +194,20 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
 
 int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
 {
-    ON_DEBUG( char* instruction = (char*)(output->buffer + output->ip - 1); )
+    char* instruction = (char*)(output->buffer + output->ip - 1); 
 
     input->start = SkipSpaces( input->start );
-    input->start += strlen("push");
+    input->start += 4;      // strlen("push")
     input->start = SkipSpaces( input->start );
 
     if ( strchr( input->start, '[' ) != nullptr )
     {
         printf("Push to memory\n");
-        //===============================================================
-        if ( strchr( input->start, ']' ) != nullptr )
-        {
-            ;
-        }   
-        else 
+        //=============================================================== 
+        if ( strchr( input->start, ']' ) == nullptr )
         {
             printf(RED "WARNING: no closing bracket ']' \n" DELETE_COLOR);
-        }
+        }   
         //================================================================
 
         *(output->buffer + output->ip - 1) |= MEMORY_MASK;
@@ -290,7 +280,7 @@ int GetArgPush( struct Output_buffer* output, struct Line_ptr* input)
 int GetArgNum( struct Line_ptr* input )
 {
     input->start = SkipSpaces( input->start );
-    printf(RED "string in GetArgNum:\n%s\n" DELETE_COLOR , input->start);
+    ON_DEBUG( printf(RED "string in GetArgNum:\n%s\n" DELETE_COLOR , input->start); )
 
     char trash[2] = {};
     AssemblerElem value = 0;
@@ -318,7 +308,6 @@ int GetArgNum( struct Line_ptr* input )
         }
     }
     
-
     return -1;
 }
 
@@ -350,8 +339,6 @@ int GetRegister( struct Output_buffer* output, struct Line_ptr* input, char* ins
     input->start = SkipSpaces( input->start );
 
     char first_letter = 0, second_letter = 0;
-
-    // printf("\nin GetRegister: %s\n", in_buf);
 
     if ( sscanf(input->start, "%c", &first_letter ) == 1 )
     {
@@ -413,13 +400,9 @@ int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instru
     if ( sscanf(input->start, "%lf", &arg) == 1 )
     {
         *(AssemblerElem*)(output->buffer + output->ip ) = arg;
-        printf(ORANGE "value argument: %lf\n" DELETE_COLOR, arg);
+        ON_DEBUG( printf(ORANGE "value argument: %lf\n" DELETE_COLOR, arg); )
 
-        *instruction |= INPUT_MASK; //TODO:
-
-        printf("\n");
-        // BinaryCharOutput( *(char*)(output->buffer + output->ip - 1) );
-        printf("\n");
+        *instruction |= INPUT_MASK; 
     }
     else 
     {
@@ -435,24 +418,20 @@ int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instru
 
 int GetArgPop( struct Output_buffer* output, struct Line_ptr* input ) 
 {
-    ON_DEBUG( char* instruction = (output->buffer + output->ip - 1); )
+    char* instruction = (output->buffer + output->ip - 1); 
 
     input->start = SkipSpaces( input->start );
-    input->start += strlen("pop");
+    input->start += 3; // strlen("pop");
     input->start = SkipSpaces( input->start );
 
     if ( strchr( input->start, '[' ) != nullptr )
     {
-        printf("Pop from memory\n");
-        //===============================================================
-        if ( strchr( input->start, ']' ) != nullptr )
-        {
-            ;
-        }   
-        else 
+        ON_DEBUG( printf("Pop from memory\n"); )
+        //=============================================================== 
+        if ( strchr( input->start, ']' ) == nullptr )
         {
             printf(RED "WARNING: no closing bracket ']' \n" DELETE_COLOR);
-        }
+        }   
         //================================================================
 
         *(output->buffer + output->ip - 1) |= MEMORY_MASK;
@@ -524,17 +503,13 @@ int GetArgPop( struct Output_buffer* output, struct Line_ptr* input )
 
 void BufferResize( struct Output_buffer* output )
 {
-    printf("ip: %d capacity: %d\n", output->ip, output->capacity);
+    ON_DEBUG( printf("ip: %d capacity: %d\n", output->ip, output->capacity); )
     if ( output->ip + 10 >= output->capacity )
     {
         ON_DEBUG( printf(RED "resizing\n" DELETE_COLOR); )
         output->buffer = (char*)realloc( output->buffer, output->capacity * 2 );
         output->capacity *= 2;
     }
-    else 
-    {
-        ;
-    } 
 }
 
 

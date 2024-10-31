@@ -1,6 +1,6 @@
-#define DEBUG
+// #define DEBUG
 // #define STEP
-#define RUN_PROC
+// #define RUN_PROC
 
 #include "../Headers/proc_functions.h"
 #include "../Headers/proc_library.h"
@@ -82,7 +82,7 @@ ProcElem GetArgPush( struct SPU* proc )
     }
     else 
     {
-        printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR);
+        ON_DEBUG_PROC( printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR); )
     }
 
     return arg;
@@ -165,7 +165,7 @@ int DoPop( ProcElem arg, struct SPU* proc )
     }
     else 
     {
-        printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR);
+        ON_DEBUG_PROC( printf(RED "Something wrong in the instruction of Push\n" DELETE_COLOR); )
         return -1;
     }
 
@@ -194,7 +194,7 @@ int DoJump( struct SPU* proc)
     }
     else if ( *( proc->code + proc->IP) == kRet )
     {
-        printf("ret:\n");
+        ON_DEBUG_PROC( printf("ret:\n"); )
 
         if ( proc->calls_stack.size > 0 )
         {
@@ -307,7 +307,7 @@ int DoJump( struct SPU* proc)
     }
     else 
     {
-        printf(RED "Not enough elements to comapare, and jump\n" DELETE_COLOR);
+        ON_DEBUG_PROC( printf(RED "Not enough elements to comapare, and jump\n" DELETE_COLOR); )
         return -1;
     }
 

@@ -1,5 +1,6 @@
 #include "../Headers/proc_library.h"
 #include "../Headers/proc_functions.h"
+#include "../Headers/proc_macros.h"
 
 int main()
 {
@@ -16,11 +17,14 @@ int main()
 
 
     //============CHECK===========================
-    for( uint32_t i = 0; i < proc.size_of_code; i++)
-    {
-        printf("%10u\n", *(unsigned char*)(proc.code + i) );
-    }
-    printf("\n");
+    PRINT_PROCESS
+    ( 
+        for( uint32_t i = 0; i < proc.size_of_code; i++)
+        {
+            printf("%10u\n", *(unsigned char*)(proc.code + i) );
+        }
+        printf("\n");
+    )
     //============================================
 
 

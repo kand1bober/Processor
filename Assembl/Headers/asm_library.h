@@ -9,6 +9,7 @@
 #define ASSEMBLER_LIBRARY_HEADER
 
 const int LABEL_ARR_SIZE = 20;
+const int JUMP_ARR_SIZE = 40;
 
 const uint32_t SIGNATURE = 0x56564b;
 const uint32_t VERSION = 3;
@@ -25,6 +26,14 @@ struct Label
 {
     char name[10];
     int label_ip;
+
+    //===========================
+    // int jump_ip;// уйдёт //TODO:
+};
+
+struct Jump
+{
+    Label* label;
     int jump_ip;
 };
 
@@ -32,7 +41,10 @@ struct Label_table
 {
     Label* labels;
     int amount;
+
+    Jump* jumps;
     int jump_count;
+    int filled_jump_count;
 };
 
 #endif

@@ -1,5 +1,4 @@
 
-
 all: make run
 
 
@@ -7,11 +6,10 @@ all: make run
 make: assembler processor
 
 assembler: 
-	cd Assembl && make 
+	cd Assembl && make DEB_ASM=1
 
 processor:
-	cd Proc && make 
-
+	cd Proc && make DEB=0 PRINT=0
 
 
 
@@ -22,7 +20,6 @@ run_assembler:
 
 run_processor:
 	cd Proc && ./Processor 
-
 
 
 clean: 

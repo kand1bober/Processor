@@ -45,6 +45,8 @@ void LabelTableCtor(struct Label_table* spisok);
 void LabelTableDtor(struct Label_table* spisok);
 void FindLabels(struct Label_table* spisok, struct File_asm* file);
 int WriteLabel(struct Label_table* spisok, char* ptr, size_t length);
+int WriteJump(struct Label_table* spisok, char* ptr, size_t length); //
+
 Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t size );
 void LabelDump(struct Label_table* spisok);
 char* SkipSpaces(char* ptr);

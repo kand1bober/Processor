@@ -1,4 +1,3 @@
-// #define PRINT_DEBUG
 
 #include <stdio.h>
 #include <string.h>
@@ -50,7 +49,6 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 {
     struct Label_table spisok = {};
     LabelTableCtor(&spisok);
-
     FindLabels(&spisok, file_a);
 
     output->buffer = (char*)calloc( 10, sizeof(char) );  //хуета, добавить realloc по ip, sizeof(char)
@@ -60,6 +58,7 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
     char command_name[20] = {};
 
     //==================FIRST PROCESSING==========================
+    ON_DEBUG( printf(GREEN "===== Fisrt Processing ====== \n" DELETE_COLOR); )
     for (int i = 0; i < file_a->lines_amount; i++)
     {
         sscanf( file_a->lines_arr[i].start, "%s", command_name );
@@ -78,23 +77,31 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
 
         ON_DEBUG( printf(ORANGE "\nip after iteration: %d\n" DELETE_COLOR, output->ip); )
     }
-    // ===================END OF FIRST=============================
+    // =================== END OF FIRST =============================
 
+    LabelDump(&spisok); 
 
-    //===============SECOND PROCESSING=============================
+    //=============== SECOND PROCESSING( Inserting Memmored Jump ip's) =============================
+    ON_DEBUG( printf(GREEN "===== Second Processing (Inserting Memmored Jump ip's) ====== \n" DELETE_COLOR); )
     AssemblerElem value = 0;
     char* target = nullptr;
-    for(int i = 0; i < spisok.jump_count; i++)
+
+    if ( spisok.jump_count == spisok.filled_jump_count )
     {
-        value = spisok.labels[i].label_ip;
-        target = output->buffer + spisok.labels[i].jump_ip; 
-        memcpy(target, &value, sizeof(AssemblerElem) );  //TODO: зависит ли от типа ?
+        for(int i = 0; i < spisok.filled_jump_count; i++)
+        {
+            value = (spisok.jumps + i)->label->label_ip;
+            target = output->buffer + (spisok.jumps + i)->jump_ip;
+            memcpy(target, &value, sizeof(AssemblerElem) );  //TODO: зависит ли от типа ?
+        }
+    }
+    else 
+    {
+        printf(RED "amount of filled jumps doesn't match  to amount of all known jumps" DELETE_COLOR);
     }
     //=================END OF SECOND===============================
 
     output->buffer = (char*)realloc( output->buffer, output->ip );
-
-    LabelDump(&spisok); 
 
     LabelTableDtor(&spisok);
 }
@@ -163,8 +170,7 @@ int GetName( char* command_name, struct Output_buffer* output, struct Label_tabl
             status = 0;
         }
     }
-    //TODO: сделать поиск по двум массивам. Регистров и комманд
-
+    // status = 0 -- means classic argument
     if ( (status != 0) && ( search = SearchLabel(spisok, command_name, strlen(command_name) + 1) ) )
     {
         // printf("Getname: only label\n");
@@ -411,9 +417,6 @@ int GetValue( struct Output_buffer* output, struct Line_ptr* input, char* instru
 
     return arg; 
 }
-
-//================================================================================
-
 
 
 int GetArgPop( struct Output_buffer* output, struct Line_ptr* input ) 

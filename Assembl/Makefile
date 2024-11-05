@@ -3,7 +3,12 @@ CC = g++
 CFLAGS = -D _DEBUG -O0 -Wall -Wextra
 
 
-# BUILD_DIR = build
+DEB_ASM:= 0
+
+ifeq ($(DEB_ASM), 1)
+	CFLAGS += -DPRINT_DEBUG
+endif
+
 
 SOURCES_DIR_ASSEMBLER=Sources
 SOURCES_DIR_PARSER=../Parser/Sources

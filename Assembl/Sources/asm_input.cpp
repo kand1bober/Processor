@@ -1,4 +1,3 @@
-#define PRINT_DEBUG
 
 #include "../Headers/asm_macros.h"
 #include "../Headers/asm_functions.h"

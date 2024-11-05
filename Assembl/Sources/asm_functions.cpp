@@ -92,7 +92,7 @@ void OutputBuffer(struct File_asm* file_a, struct Output_buffer* output)
         {
             value = (spisok.jumps + i)->label->label_ip;
             target = output->buffer + (spisok.jumps + i)->jump_ip;
-            memcpy(target, &value, sizeof(AssemblerElem) );  //TODO: зависит ли от типа ?
+            memcpy(target, &value, sizeof(AssemblerElem) ); 
         }
     }
     else 

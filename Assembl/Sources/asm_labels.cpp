@@ -37,19 +37,14 @@ void FindLabels(struct Label_table* spisok, struct File_asm* file)
 
         if ( ( ptr1 = strchr( file->lines_arr[i].start, ':' ) ) != nullptr ) 
         {
-            //TODO:подрихтовать
-            if ( ( ptr2 = strchr( file->lines_arr[i].start, ' ' ) ) != nullptr)
-            {
-                continue;
-                // ptr2 = SkipSpaces( ptr2 );
-                
-                // WriteLabel(spisok, ptr2, strlen(ptr2) + 1 );
-                // ON_DEBUG( printf(YELLOW "length of second metka: %ld\n" DELETE_COLOR, strlen(ptr2) + 1); )
-            }
-            else 
+            if ( ( ptr2 = strchr( file->lines_arr[i].start, ' ' ) ) == nullptr)
             {
                 WriteLabel(spisok, file->lines_arr[i].start, ptr1 - file->lines_arr[i].start + 2);
                 ON_DEBUG( printf(YELLOW "length of first metka: %ld\n" DELETE_COLOR, ptr1 - file->lines_arr[i].start + 2 ); );
+            }
+            else 
+            {
+                continue;
             }
         }
         else 
@@ -144,7 +139,7 @@ int WriteLabel(struct Label_table* spisok, char* ptr, size_t length)
 int WriteJump(struct Label_table* spisok, char* ptr, size_t length)
 {
     int status = 0;
-    
+
     //====Simply writing name of label in next jump structure======
     for ( int i = 0; i < spisok->amount; i++ )
     {   
@@ -245,28 +240,6 @@ void LabelDump(struct Label_table* spisok)
     printf(DELETE_COLOR SINIY "===End of the dump===\n\n" DELETE_COLOR);
 }
 
-// TODO: utilities.cpp, utiltiies.h
-
-char* SkipSpaces(char* ptr)
-{
-    int i = 0;
-    while( *(ptr + i) == ' ')
-    {
-        i++;
-    }
-    return ptr + i;
-}
-
-char* SkipUntilSpace( char* ptr )
-{
-    int i  = 0;
-    while( *(ptr + i) != ' ' )
-    {
-        i++;
-    }
-    return ptr + i;
-}
-
 
 void FillArrayOfJumps(struct Label* label, struct Label_table* spisok, int ip)
 {
@@ -274,3 +247,5 @@ void FillArrayOfJumps(struct Label* label, struct Label_table* spisok, int ip)
     (spisok->jumps + spisok->filled_jump_count)->jump_ip = ip;
     spisok->filled_jump_count += 1;
 }
+
+

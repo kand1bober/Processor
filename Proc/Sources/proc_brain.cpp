@@ -119,20 +119,20 @@ void Run(  struct SPU* proc_copy )
 
                 case kOut:
                 {
-                    PRINT_PROCESS( printf("Out\n"); )
                     ProcElem arg = 0;
                     proc->IP += 1;
                     arg = STACK_POP_CALL(&proc->stack);
-                    PRINT_PROCESS( printf("%lf\n", arg); )
+                    printf("OUT: %lf\n", arg); 
                     PAUSE;
                     continue;
                 }
 
                 case kIn:
                 {
-                    PRINT_PROCESS( printf("In\n"); )
+                    printf("In\n");
                     ProcElem arg = 0;
                     scanf("%lf", &arg);
+                    proc->IP += 1;
                     STACK_PUSH_CALL(&proc->stack, arg);
                     PAUSE;
                     continue;

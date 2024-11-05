@@ -9,7 +9,7 @@ assembler:
 	cd Assembl && make DEB_ASM=1
 
 processor:
-	cd Proc && make DEB=0 PRINT=0
+	cd Proc && make DEB_STACK=0 PRINT_STACK=0 PROC_DEB=0 PROC_STEP=0 PROC_PRINT=0
 
 
 

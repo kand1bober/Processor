@@ -26,9 +26,6 @@ struct Label
 {
     char name[10];
     int label_ip;
-
-    //===========================
-    // int jump_ip;// уйдёт //TODO:
 };
 
 struct Jump

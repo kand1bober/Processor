@@ -69,16 +69,31 @@ OBJECTS_STACK = $(SOURCES_STACK:.cpp =.o)
 EXECUTABLE = Processor 
 
 
-PRINT := 0
-DEB   := 0
+PRINT_STACK := 0
+DEB_STACK   := 0
+DEB_PROC    := 0
 
 
-ifeq ($(PRINT), 1)
+ifeq ($(PRINT_STACK), 1)
 	CFLAGS += -DOTHER_PRINTS
 endif
 
-ifeq ($(DEB), 1)
-	CFLAGS += -DUSE_DEBUG
+ifeq ($(DEB_STACK), 1)
+	CFLAGS += -DUSE_DEBUG 
+endif
+
+
+
+ifeq ($(PROC_DEB=0), 1)
+	CFLAGS += -DDEBUG 
+endif
+
+ifeq ($(PROC_STEP=0), 1)
+	CFLAGS += -DSTEP
+endif
+
+ifeq ($(PROC_PRINT=0), 1)
+	CFLAGS += -DRUN_PROC
 endif
 
 

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "../Headers/asm_library.h"
+#include "../Headers/asm_utilities.h"
 
 #ifndef ASM_FUNCTIONS_HEADER
 #define ASM_FUNCTIONS_HEADER
@@ -49,8 +50,6 @@ int WriteJump(struct Label_table* spisok, char* ptr, size_t length); //
 
 Label* SearchLabel( struct Label_table* spisok, char* ptr,  size_t size );
 void LabelDump(struct Label_table* spisok);
-char* SkipSpaces(char* ptr);
-char* SkipUntilSpace(char* ptr);
 //==================================================================
 
 
